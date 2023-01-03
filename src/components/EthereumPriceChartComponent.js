@@ -10,7 +10,8 @@ class EthereumPriceChartComponent extends Component {
                     mode: 'dark',
                 },
                 chart: {
-                    id: "basic-bar",
+                    id: "ETH_price_development",
+                    background: "transparent"
                 },
                 xaxis: {
                     type: 'datetime'

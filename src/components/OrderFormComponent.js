@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import {Container, Stack, Row, Card} from "react-bootstrap";
-import MockData from "../mockdata.json"
 import EthereumPriceChartComponent from "./EthereumPriceChartComponent";
 
-//import axios from "axios";
+import axios from "axios";
 
 class OrderFormComponent extends Component {
 
@@ -15,33 +14,28 @@ class OrderFormComponent extends Component {
     }
 
     componentDidMount() {
-        let dataPoints = []
-        //TODO: delete when this page is finished
-        MockData.ethPriceData.forEach(e => {
-            let datapointEntry = {
-                x: e.time_period_start,
-                y: [e.rate_open, e.rate_high, e.rate_low, e.rate_close]
+        const ethData = JSON.parse(window.localStorage.getItem('ethData'));
+        if (ethData && this.getDateForSeries(1) === new Date(ethData[0].data[ethData[0].data.length-1].x).toISOString().split('T')[0]) {
+            this.setState({ethPriceData: ethData});
+        } else {
+            const options = {
+                "headers": {'X-CoinAPI-Key': '0B18330A-C219-46D0-9550-4D61C25EDEDC'}
             }
-            dataPoints.push(datapointEntry);
-        })
-        this.setState({ethPriceData: [{data: dataPoints}]});
+            axios.get(`https://rest.coinapi.io/v1/exchangerate/ETH/USD/history?period_id=1DAY&time_start=${this.getDateForSeries(100)}T00:00:00&time_end=${this.getDateForSeries(0)}T00:00:00`, options)
+                .then(res => {
+                    let dataPoints = []
+                    res.data.forEach(e => {
+                        let datapointEntry = {
+                            x: e.time_period_start,
+                            y: [e.rate_open, e.rate_high, e.rate_low, e.rate_close]
+                        }
+                        dataPoints.push(datapointEntry);
+                    });
 
-        /*
-        TODO: uncomment. works, but don't flood the page, max 100 requests daily with the url
-        const options = {
-            "headers": {'X-CoinAPI-Key': '0B18330A-C219-46D0-9550-4D61C25EDEDC'}
+                    this.setState({ethPriceData: [{data: dataPoints}]});
+                    window.localStorage.setItem('ethData', JSON.stringify([{data: dataPoints}]));
+            });
         }
-        axios.get(`https://rest.coinapi.io/v1/exchangerate/ETH/USD/history?period_id=1DAY&time_start=${this.getDateForSeries(100)}T00:00:00&time_end=${this.getDateForSeries(0)}T00:00:00`, options)
-            .then(res => {
-                res.data.forEach(e => {
-                    let datapointEntry = {
-                        x: e.time_period_start,
-                        y: [e.rate_open, e.rate_high, e.rate_low, e.rate_close]
-                    }
-                    dataPoints.push(datapointEntry);
-                });
-                this.setState({ethPriceData: [{data: dataPoints}]});
-        });*/
     }
 
     getDateForSeries(subDays){
@@ -55,7 +49,7 @@ class OrderFormComponent extends Component {
             <Container>
                 <Stack gap={3}>
                     <Row>
-                        <Card>
+                        <Card bg={this.props.layoutMode}>
                             <EthereumPriceChartComponent ethPriceData={this.state.ethPriceData}/>
                         </Card>
                     </Row>

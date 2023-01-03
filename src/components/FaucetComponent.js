@@ -29,15 +29,15 @@ class FaucetComponent extends Component {
                                 <Card.Text>
                                     <Container>
                                         <Row style={myStyle}>
-                                    <InputGroup size="lg">
-                                        <InputGroup.Text id="inputGroup-sizing-lg">LINK Address</InputGroup.Text>
-                                        <Form.Control
-                                            aria-label="Large"
-                                            aria-describedby="inputGroup-sizing-sm"
-                                            defaultValue={linkTokenAddress}
-                                            disabled={true}
-                                        />
-                                    </InputGroup>
+                                            <InputGroup size="lg">
+                                                <InputGroup.Text id="inputGroup-sizing-lg">LINK Address</InputGroup.Text>
+                                                <Form.Control
+                                                    aria-label="Large"
+                                                    aria-describedby="inputGroup-sizing-sm"
+                                                    defaultValue={linkTokenAddress}
+                                                    disabled={true}
+                                                />
+                                            </InputGroup>
                                         </Row>
                                     </Container>
                                 </Card.Text>

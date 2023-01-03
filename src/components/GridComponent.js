@@ -12,6 +12,7 @@ import faucet from "../contracts/faucet/faucet";
 import "../App.css";
 import UZHBlockchain from '../UZHBlockchain.png'
 import {ethers} from "ethers";
+import axios from "axios";
 
 
 class Grid extends Component {
@@ -30,8 +31,15 @@ class Grid extends Component {
             withdrawSuccess: "",
             transactionData: "",
             showConnectionError: false,
+            ethPriceData: [],
             target: null
         };
+    }
+
+    getDateForSeries(subDays){
+        let date = new Date();
+        date.setDate(date.getDate() - subDays);
+        return date.toISOString().split('T')[0];
     }
 
     async connectToWallet(event) {
@@ -84,6 +92,29 @@ class Grid extends Component {
             this.setState({walletAddress: ""})
             console.log("Please install MetaMask");
         }
+
+        const ethData = JSON.parse(window.localStorage.getItem('ethData'));
+        if (ethData && this.getDateForSeries(1) === new Date(ethData[0].data[ethData[0].data.length-1].x).toISOString().split('T')[0]) {
+            this.setState({ethPriceData: ethData});
+        } else {
+            const options = {
+                "headers": {'X-CoinAPI-Key': '0B18330A-C219-46D0-9550-4D61C25EDEDC'}
+            }
+            axios.get(`https://rest.coinapi.io/v1/exchangerate/ETH/USD/history?period_id=10MIN&time_start=${this.getDateForSeries(7)}T00:00:00&time_end=${this.getDateForSeries(0)}T00:00:00`, options)
+                .then(res => {
+                    let dataPoints = []
+                    res.data.forEach(e => {
+                        let datapointEntry = {
+                            x: e.time_period_start,
+                            y: [e.rate_open, e.rate_high, e.rate_low, e.rate_close]
+                        }
+                        dataPoints.push(datapointEntry);
+                    });
+
+                    this.setState({ethPriceData: [{data: dataPoints}]});
+                    window.localStorage.setItem('ethData', JSON.stringify([{data: dataPoints}]));
+                });
+        }
     };
 
     async getFaucetOCTHandler () {
@@ -101,11 +132,14 @@ class Grid extends Component {
     async getOptionsOCTHandler () {
         this.setState({withdrawError: "", withdrawSuccess: ""});
         try {
+
             //const optionsContractWithSigner = this.state.options.connect(this.state.signer);
+            console.log("here")
             //const resp = await optionsContractWithSigner.correspondingMethod()
             //console.log(resp.hash);
             //this.setState({transactionData: resp.hash, withdrawSuccess: "Operation succeeded - it might take a minute or two but enjoy your tokens!"});
         } catch (err) {
+            console.log("shit")
             this.setState({withdrawError: err.message});
         }
     };
@@ -157,7 +191,7 @@ class Grid extends Component {
                     <Routes>
                         <Route exact path='/' element={<HomeComponent />} />
                         <Route exact path='/faucet' element={<FaucetComponent faucet={this.state.faucet} withdrawError={this.state.withdrawError} withdrawSuccess={this.state.withdrawSuccess} walletAddress={this.state.walletAddress} getOCTHandler={this.getFaucetOCTHandler.bind(this)} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode}/>} />
-                        <Route exact path='/order' element={<OrderFormComponent options={this.state.options} withdrawError={this.state.withdrawError} withdrawSuccess={this.state.withdrawSuccess} walletAddress={this.state.walletAddress} getOCTHandler={this.getOptionsOCTHandler.bind(this)} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} />} />
+                        <Route exact path='/order' element={<OrderFormComponent executeOption={this.getOptionsOCTHandler.bind(this)} options={this.state.options} withdrawError={this.state.withdrawError} withdrawSuccess={this.state.withdrawSuccess} walletAddress={this.state.walletAddress} getOCTHandler={this.getOptionsOCTHandler.bind(this)} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
                         <Route exact path='/list' element={<OfferListComponent />} />
                     </Routes>
 

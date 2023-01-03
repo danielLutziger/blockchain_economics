@@ -1,9 +1,15 @@
 import React, { Component } from 'react';
+import {Container, Stack, Row} from "react-bootstrap";
 
 class OrderFormComponent extends Component {
     render() {
         return (
-            <div>Statement of intent</div>
+            <Container>
+                <Stack gap={3}>
+                    <Row>
+                    </Row>
+                </Stack>
+            </Container>
         );
     }
 }

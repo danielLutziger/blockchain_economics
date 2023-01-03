@@ -7,6 +7,7 @@ import FaucetComponent from "./FaucetComponent";
 import OfferListComponent from "./OfferListComponent";
 import OrderFormComponent from "./OrderFormComponent";
 // contracts abi
+import options from "../contracts/options/options"
 import faucet from "../contracts/faucet/faucet";
 import "../App.css";
 import UZHBlockchain from '../UZHBlockchain.png'
@@ -24,6 +25,7 @@ class Grid extends Component {
             walletAddress: "",
             signer: "",
             faucet: null,
+            options: null,
             withdrawError: "",
             withdrawSuccess: "",
             transactionData: "",
@@ -40,13 +42,12 @@ class Grid extends Component {
                 // get accounts
                 const accounts = await provider.send("eth_requestAccounts", []);
                 // set values in the state
-                this.setState({signer: provider.getSigner(), walletAddress: accounts[0], faucet: faucet(provider)});
+                this.setState({signer: provider.getSigner(), walletAddress: accounts[0], faucet: faucet(provider), options: options(provider)});
             } catch (err) {
                 console.error(err.message);
                 this.setState({showConnectionError: !this.state.showConnectionError, target: event.target});
             }
         } else {
-            /* MetaMask is not installed */
             console.log("Please install MetaMask");
             this.setState({showConnectionError: !this.state.showConnectionError, target: event.target});
         }
@@ -61,7 +62,7 @@ class Grid extends Component {
                 const accounts = await provider.send("eth_requestAccounts", []);
                 // set values in the state
                 if (accounts.length > 0) {
-                    this.setState({signer: provider.getSigner(), walletAddress: accounts[0], faucet: faucet(provider)});
+                    this.setState({signer: provider.getSigner(), walletAddress: accounts[0], faucet: faucet(provider), options: options(provider)});
                 } else {
                     console.log("Connect to MetaMask using the Connect Wallet button")
                 }
@@ -69,7 +70,6 @@ class Grid extends Component {
                 console.error(err.message);
             }
         } else {
-            /* MetaMask is not installed */
             console.log("Please install MetaMask");
         }
     }
@@ -81,19 +81,30 @@ class Grid extends Component {
                 this.setState({walletAddress: accounts[0]});
             });
         } else {
-            /* MetaMask is not installed */
             this.setState({walletAddress: ""})
             console.log("Please install MetaMask");
         }
     };
 
-    async getOCTHandler () {
+    async getFaucetOCTHandler () {
         this.setState({withdrawError: "", withdrawSuccess: ""});
         try {
             const fcContractWithSigner = this.state.faucet.connect(this.state.signer);
             const resp = await fcContractWithSigner.requestTokens();
             console.log(resp.hash);
             this.setState({transactionData: resp.hash, withdrawSuccess: "Operation succeeded - it might take a minute or two but enjoy your tokens!"});
+        } catch (err) {
+            this.setState({withdrawError: err.message});
+        }
+    };
+
+    async getOptionsOCTHandler () {
+        this.setState({withdrawError: "", withdrawSuccess: ""});
+        try {
+            //const optionsContractWithSigner = this.state.options.connect(this.state.signer);
+            //const resp = await optionsContractWithSigner.correspondingMethod()
+            //console.log(resp.hash);
+            //this.setState({transactionData: resp.hash, withdrawSuccess: "Operation succeeded - it might take a minute or two but enjoy your tokens!"});
         } catch (err) {
             this.setState({withdrawError: err.message});
         }
@@ -145,7 +156,7 @@ class Grid extends Component {
                     </Navbar>
                     <Routes>
                         <Route exact path='/' element={<HomeComponent />} />
-                        <Route exact path='/faucet' element={<FaucetComponent faucet={this.state.faucet} withdrawError={this.state.withdrawError} withdrawSuccess={this.state.withdrawSuccess} walletAddress={this.state.walletAddress} getOCTHandler={this.getOCTHandler.bind(this)} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode}/>} />
+                        <Route exact path='/faucet' element={<FaucetComponent faucet={this.state.faucet} withdrawError={this.state.withdrawError} withdrawSuccess={this.state.withdrawSuccess} walletAddress={this.state.walletAddress} getOCTHandler={this.getFaucetOCTHandler.bind(this)} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode}/>} />
                         <Route exact path='/order' element={<OrderFormComponent />} />
                         <Route exact path='/list' element={<OfferListComponent />} />
                     </Routes>

@@ -129,15 +129,14 @@ class Grid extends Component {
         }
     };
 
-    async getOptionsOCTHandler () {
+    async getOptionsOCTHandler (option) {
         this.setState({withdrawError: "", withdrawSuccess: ""});
         try {
 
-            //const optionsContractWithSigner = this.state.options.connect(this.state.signer);
-            console.log("here")
-            //const resp = await optionsContractWithSigner.correspondingMethod()
-            //console.log(resp.hash);
-            //this.setState({transactionData: resp.hash, withdrawSuccess: "Operation succeeded - it might take a minute or two but enjoy your tokens!"});
+            const optionsContractWithSigner = this.state.options.connect(this.state.signer);
+            const resp = await optionsContractWithSigner.sellOption(option.type, option.strikePrice, option.premium, option.expiration, option.tknAmnt)
+            console.log(resp.hash);
+            this.setState({transactionData: resp.hash, withdrawSuccess: "Operation succeeded - it might take a minute or two but enjoy your tokens!"});
         } catch (err) {
             console.log("shit")
             this.setState({withdrawError: err.message});

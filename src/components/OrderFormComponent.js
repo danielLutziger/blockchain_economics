@@ -49,8 +49,8 @@ class OrderFormComponent extends Component {
 
     executeOption(event){
         if (this.state.model.strikePrice > 0 &&  this.state.model.premium > 0
-            && this.state.model.tknAmnt > 0 && this.state.model.expiration > Date.now() ){
-            this.props.executeOption();
+            && this.state.model.tknAmnt > 0 && new Date(this.state.model.expiration) > new Date(Date.now()) ){
+            this.props.executeOption(this.state.model);
         } else {
             this.setState({showConnectionError: !this.state.showConnectionError, target: event.target});
         }
@@ -96,6 +96,8 @@ class OrderFormComponent extends Component {
                                     aria-describedby="inputGroup-sizing-sm"
                                     placeholder="Enter your desired Strike Price"
                                     type="number"
+                                    name="strikePrice"
+                                    onChange={(e) => this.inputChangeHandler(e.target.name, e.target.value)}
                                 />
                             </InputGroup>
 
@@ -105,6 +107,8 @@ class OrderFormComponent extends Component {
                                     aria-describedby="inputGroup-sizing-sm"
                                     placeholder="Enter the desired premium for this offer"
                                     type="number"
+                                    name="premium"
+                                    onChange={(e) => this.inputChangeHandler(e.target.name, e.target.value)}
                                 />
                             </InputGroup>
 
@@ -114,6 +118,8 @@ class OrderFormComponent extends Component {
                                     aria-describedby="inputGroup-sizing-sm"
                                     placeholder="Enter the expiration date"
                                     type="date"
+                                    name="expiration"
+                                    onChange={(e) => this.inputChangeHandler(e.target.name, e.target.value)}
                                 />
                             </InputGroup>
 
@@ -123,6 +129,8 @@ class OrderFormComponent extends Component {
                                     aria-describedby="inputGroup-sizing-sm"
                                     placeholder="How many ETH do you want in the contract (10^18)"
                                     type="number"
+                                    name="tknAmnt"
+                                    onChange={(e) => this.inputChangeHandler(e.target.name, e.target.value)}
                                 />
                             </InputGroup>
 

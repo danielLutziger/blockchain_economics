@@ -134,7 +134,13 @@ class Grid extends Component {
         try {
 
             const optionsContractWithSigner = this.state.options.connect(this.state.signer);
-            const resp = await optionsContractWithSigner.sellOption(option.type, option.strikePrice, option.premium, option.expiration, option.tknAmnt)
+            const value = ethers.utils.formatEther(option.tknAmnt);
+
+            const resp = await optionsContractWithSigner.sellOption(option.type, option.strikePrice, option.premium, new Date(option.expiration).getTime() / 1000, option.tknAmnt)
+                .send({ value: value })
+                .then(function(receipt) {
+                    console.log(receipt);
+                });
             console.log(resp.hash);
             this.setState({transactionData: resp.hash, withdrawSuccess: "Operation succeeded - it might take a minute or two but enjoy your tokens!"});
         } catch (err) {

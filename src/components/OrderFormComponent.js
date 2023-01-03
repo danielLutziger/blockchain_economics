@@ -20,7 +20,7 @@ class OrderFormComponent extends Component {
         super(props);
         this.state = {
             model: {
-                type: "CALL",
+                type: "call",
                 strikePrice: "",
                 premium: "",
                 expiration: "",
@@ -59,8 +59,8 @@ class OrderFormComponent extends Component {
     render() {
         const myStyle = {marginTop: "1rem", marginBottom: "1rem"}
         const radios = [
-            { name: 'Sell Call Option', value: 'CALL' },
-            { name: 'Sell Put Option', value: 'PUT' },
+            { name: 'Sell Call Option', value: 'call' },
+            { name: 'Sell Put Option', value: 'put' },
         ];
 
         return (
@@ -134,7 +134,13 @@ class OrderFormComponent extends Component {
                                 />
                             </InputGroup>
 
-                            <Button variant="primary" type="submit" style={myStyle} onClick={this.executeOption.bind(this)}>
+                            <Button
+                                variant="primary"
+                                type="submit"
+                                style={myStyle}
+                                onClick={this.executeOption.bind(this)}
+                                disabled={this.props.walletAddress ? null : true}
+                            >
                                 Create {this.state.model.type} Option
                             </Button>
                             <Overlay

@@ -1,3 +1,10 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  background-color: black !important;
+  color: white !important;
+}
+
 .App {
   text-align: center;
 }
@@ -35,4 +42,8 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.cardTitle{
+  font-size: 18px;
 }

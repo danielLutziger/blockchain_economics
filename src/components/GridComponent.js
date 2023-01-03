@@ -157,7 +157,7 @@ class Grid extends Component {
                     <Routes>
                         <Route exact path='/' element={<HomeComponent />} />
                         <Route exact path='/faucet' element={<FaucetComponent faucet={this.state.faucet} withdrawError={this.state.withdrawError} withdrawSuccess={this.state.withdrawSuccess} walletAddress={this.state.walletAddress} getOCTHandler={this.getFaucetOCTHandler.bind(this)} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode}/>} />
-                        <Route exact path='/order' element={<OrderFormComponent />} />
+                        <Route exact path='/order' element={<OrderFormComponent options={this.state.options} withdrawError={this.state.withdrawError} withdrawSuccess={this.state.withdrawSuccess} walletAddress={this.state.walletAddress} getOCTHandler={this.getOptionsOCTHandler.bind(this)} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} />} />
                         <Route exact path='/list' element={<OfferListComponent />} />
                     </Routes>
 

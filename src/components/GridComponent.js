@@ -6,6 +6,7 @@ import HomeComponent from "./HomeComponent";
 import FaucetComponent from "./FaucetComponent";
 import OfferListComponent from "./OfferListComponent";
 import OrderFormComponent from "./OrderFormComponent";
+import USDExchangeComponent from "./USDExchangeComponent";
 // contracts abi
 import options from "../contracts/options/options"
 import faucet from "../contracts/faucet/faucet";
@@ -29,6 +30,10 @@ class Grid extends Component {
             options: null,
             withdrawError: "",
             withdrawSuccess: "",
+            creationError: "",
+            creationSuccess: "",
+            orderError: "",
+            orderSuccess: "",
             transactionData: "",
             showConnectionError: false,
             ethPriceData: [],
@@ -122,7 +127,6 @@ class Grid extends Component {
         try {
             const fcContractWithSigner = this.state.faucet.connect(this.state.signer);
             const resp = await fcContractWithSigner.requestTokens();
-            console.log(resp.hash);
             this.setState({transactionData: resp.hash, withdrawSuccess: "Operation succeeded - it might take a minute or two but enjoy your tokens!"});
         } catch (err) {
             this.setState({withdrawError: err.message});
@@ -134,19 +138,39 @@ class Grid extends Component {
         try {
 
             const optionsContractWithSigner = this.state.options.connect(this.state.signer);
-            const valueInGwei = ethers.utils.parseEther(option.tknAmnt.toString());
-            const tokenAmountinGwei = ethers.utils.parseEther(option.tknAmnt.toString());
+            const valueInWei = ethers.utils.parseEther(option.tknAmnt.toString());
+            const tokenAmountInWei = ethers.utils.parseEther(option.tknAmnt.toString());
             const type = option.type;
-            const strikePrice = option.strikePrice;
-            const premium = option.premium;
+            const strikePriceInWei = ethers.utils.parseEther(option.strikePrice.toString());
+            const premiumInWei = ethers.utils.parseEther(option.premium.toString());
             const date =  new Date(option.expiration).getTime() / 1000;
-
-            const resp = await optionsContractWithSigner.sellOption(type, strikePrice, premium, date, tokenAmountinGwei, {value: valueInGwei})
-                .then(e => console.log(e));
+            let resp;
+            if (type === "call"){
+                resp = await optionsContractWithSigner.sellCall(strikePriceInWei, premiumInWei, date, tokenAmountInWei, {value: valueInWei})
+                    .then(e => {return e.hash});
+            } else {
+                resp = await optionsContractWithSigner.sellPut(strikePriceInWei, premiumInWei, date, tokenAmountInWei)
+                    .then(e => {return e.hash});
+            }
             console.log(resp.hash);
-            this.setState({transactionData: resp.hash, creationSuccess: `${type} was created`});
+            this.setState({transactionData: resp, creationSuccess: `${type} was created`});
         } catch (err) {
             this.setState({creationError: err.message});
+        }
+    };
+
+
+    async getUSDOCTHandler (option) {
+        this.setState({orderError: "", orderSuccess: ""});
+
+        try {
+            const optionsContractWithSigner = this.state.options.connect(this.state.signer);
+            const exchangeAmountInWei = ethers.utils.parseEther(option.exchangeAmount.toString());
+            const resp = await optionsContractWithSigner.buyUZH({value: exchangeAmountInWei})
+                    .then(e => {return e.hash});
+            this.setState({transactionData: resp, orderSuccess: `Order was created`});
+        } catch (err) {
+            this.setState({orderError: err.message});
         }
     };
 
@@ -171,6 +195,7 @@ class Grid extends Component {
                                     <Nav.Link href="/faucet">Faucet</Nav.Link>
                                     <Nav.Link href="/order">Buy / sell options</Nav.Link>
                                     <Nav.Link href="/list">All Options</Nav.Link>
+                                    <Nav.Link href="/usdExchange">Exchange To USD</Nav.Link>
                                 </Nav>
                             </Navbar.Collapse>
                             <Button className="justify-content-end" variant={this.state.elementMode} onClick={this.connectToWallet.bind(this)}>
@@ -197,7 +222,8 @@ class Grid extends Component {
                     <Routes>
                         <Route exact path='/' element={<HomeComponent />} />
                         <Route exact path='/faucet' element={<FaucetComponent faucet={this.state.faucet} withdrawError={this.state.withdrawError} withdrawSuccess={this.state.withdrawSuccess} walletAddress={this.state.walletAddress} getOCTHandler={this.getFaucetOCTHandler.bind(this)} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode}/>} />
-                        <Route exact path='/order' element={<OrderFormComponent executeOption={this.getOptionsOCTHandler.bind(this)} options={this.state.options} withdrawError={this.state.withdrawError} withdrawSuccess={this.state.withdrawSuccess} walletAddress={this.state.walletAddress} getOCTHandler={this.getOptionsOCTHandler.bind(this)} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
+                        <Route exact path='/order' element={<OrderFormComponent executeOption={this.getOptionsOCTHandler.bind(this)} creationError={this.state.creationError} creationSuccess={this.state.creationSuccess} walletAddress={this.state.walletAddress} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
+                        <Route exact path='/usdExchange' element={<USDExchangeComponent executeOrder={this.getUSDOCTHandler.bind(this)} orderError={this.state.orderError} orderSuccess={this.state.orderSuccess} walletAddress={this.state.walletAddress} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
                         <Route exact path='/list' element={<OfferListComponent />} />
                     </Routes>
 

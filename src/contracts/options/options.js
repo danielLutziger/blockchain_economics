@@ -1,8 +1,48 @@
 // Local instance of the faucet contract
 import { ethers } from "ethers";
 
-const optionsAddress = "0xD235205D5B2d6d2Ed0CC05c422A880342dB2d79b";
+const optionsAddress = "0x6c870F545507aaebfB76085Cc07844925fC2E3E0";
 const optionsAbi = [
+    {
+        "inputs": [],
+        "name": "acceptOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "buyUZH",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "cancelCall",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "cancelPut",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
     {
         "inputs": [],
         "stateMutability": "nonpayable",
@@ -48,23 +88,35 @@ const optionsAbi = [
         "type": "event"
     },
     {
-        "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "id",
-                "type": "uint256"
+                "internalType": "bytes32",
+                "name": "_requestId",
+                "type": "bytes32"
             },
             {
-                "indexed": false,
-                "internalType": "string",
-                "name": "optiontype",
-                "type": "string"
+                "internalType": "uint256",
+                "name": "_ethPrice",
+                "type": "uint256"
             }
         ],
-        "name": "OptionBought",
-        "type": "event"
+        "name": "fullfillETH",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getEthereumPrice",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "requestId",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
     },
     {
         "anonymous": false,
@@ -74,12 +126,6 @@ const optionsAbi = [
                 "internalType": "uint256",
                 "name": "id",
                 "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "optiontype",
-                "type": "string"
             }
         ],
         "name": "OptionCanceled",
@@ -90,61 +136,12 @@ const optionsAbi = [
         "inputs": [
             {
                 "indexed": false,
-                "internalType": "string",
-                "name": "optiontype",
-                "type": "string"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "strike",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "premium",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "expiry",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "tknAmt",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
                 "internalType": "uint256",
                 "name": "id",
                 "type": "uint256"
             }
         ],
         "name": "OptionCreated",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "id",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "optiontype",
-                "type": "string"
-            }
-        ],
-        "name": "OptionExercised",
         "type": "event"
     },
     {
@@ -186,8 +183,57 @@ const optionsAbi = [
         "type": "event"
     },
     {
-        "inputs": [],
-        "name": "acceptOwnership",
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "strike",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "premium",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "expiry",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tknAmt",
+                "type": "uint256"
+            }
+        ],
+        "name": "sellCall",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "strike",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "premium",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "expiry",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tknAmt",
+                "type": "uint256"
+            }
+        ],
+        "name": "sellPut",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -195,19 +241,14 @@ const optionsAbi = [
     {
         "inputs": [
             {
-                "internalType": "uint256",
-                "name": "id",
-                "type": "uint256"
-            },
-            {
-                "internalType": "string",
-                "name": "optiontype",
-                "type": "string"
+                "internalType": "address",
+                "name": "to",
+                "type": "address"
             }
         ],
-        "name": "buyOption",
+        "name": "transferOwnership",
         "outputs": [],
-        "stateMutability": "payable",
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -222,7 +263,7 @@ const optionsAbi = [
         "outputs": [
             {
                 "internalType": "uint256",
-                "name": "strikePrice",
+                "name": "strike",
                 "type": "uint256"
             },
             {
@@ -232,7 +273,7 @@ const optionsAbi = [
             },
             {
                 "internalType": "uint256",
-                "name": "experation",
+                "name": "expiry",
                 "type": "uint256"
             },
             {
@@ -262,7 +303,7 @@ const optionsAbi = [
             },
             {
                 "internalType": "address payable",
-                "name": "seller",
+                "name": "writer",
                 "type": "address"
             },
             {
@@ -275,26 +316,21 @@ const optionsAbi = [
         "type": "function"
     },
     {
-        "inputs": [
+        "inputs": [],
+        "name": "ethPrice",
+        "outputs": [
             {
                 "internalType": "uint256",
-                "name": "id",
+                "name": "",
                 "type": "uint256"
-            },
-            {
-                "internalType": "string",
-                "name": "optiontype",
-                "type": "string"
             }
         ],
-        "name": "cancelOption",
-        "outputs": [],
-        "stateMutability": "payable",
+        "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [],
-        "name": "ethPrice",
+        "name": "getBalance",
         "outputs": [
             {
                 "internalType": "uint256",
@@ -313,7 +349,7 @@ const optionsAbi = [
                 "components": [
                     {
                         "internalType": "uint256",
-                        "name": "strikePrice",
+                        "name": "strike",
                         "type": "uint256"
                     },
                     {
@@ -323,7 +359,7 @@ const optionsAbi = [
                     },
                     {
                         "internalType": "uint256",
-                        "name": "experation",
+                        "name": "expiry",
                         "type": "uint256"
                     },
                     {
@@ -353,7 +389,7 @@ const optionsAbi = [
                     },
                     {
                         "internalType": "address payable",
-                        "name": "seller",
+                        "name": "writer",
                         "type": "address"
                     },
                     {
@@ -378,7 +414,7 @@ const optionsAbi = [
                 "components": [
                     {
                         "internalType": "uint256",
-                        "name": "strikePrice",
+                        "name": "strike",
                         "type": "uint256"
                     },
                     {
@@ -388,7 +424,7 @@ const optionsAbi = [
                     },
                     {
                         "internalType": "uint256",
-                        "name": "experation",
+                        "name": "expiry",
                         "type": "uint256"
                     },
                     {
@@ -418,7 +454,7 @@ const optionsAbi = [
                     },
                     {
                         "internalType": "address payable",
-                        "name": "seller",
+                        "name": "writer",
                         "type": "address"
                     },
                     {
@@ -460,7 +496,7 @@ const optionsAbi = [
         "outputs": [
             {
                 "internalType": "uint256",
-                "name": "strikePrice",
+                "name": "strike",
                 "type": "uint256"
             },
             {
@@ -470,7 +506,7 @@ const optionsAbi = [
             },
             {
                 "internalType": "uint256",
-                "name": "experation",
+                "name": "expiry",
                 "type": "uint256"
             },
             {
@@ -500,7 +536,7 @@ const optionsAbi = [
             },
             {
                 "internalType": "address payable",
-                "name": "seller",
+                "name": "writer",
                 "type": "address"
             },
             {
@@ -510,163 +546,6 @@ const optionsAbi = [
             }
         ],
         "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "retrieve",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "retrieveExpiration",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "retrieveOptionType",
-        "outputs": [
-            {
-                "internalType": "string",
-                "name": "",
-                "type": "string"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "retrievePremium",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "retrievePrice",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "retrieveTknAmnt",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "string",
-                "name": "optiontype",
-                "type": "string"
-            },
-            {
-                "internalType": "uint256",
-                "name": "strike",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "premium",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "expiry",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "tknAmt",
-                "type": "uint256"
-            }
-        ],
-        "name": "sellOption",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "string",
-                "name": "optiontype",
-                "type": "string"
-            },
-            {
-                "internalType": "uint256",
-                "name": "strike",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "prem",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "expiry",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "tkn",
-                "type": "uint256"
-            }
-        ],
-        "name": "store",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "to",
-                "type": "address"
-            }
-        ],
-        "name": "transferOwnership",
-        "outputs": [],
-        "stateMutability": "nonpayable",
         "type": "function"
     }
 ]

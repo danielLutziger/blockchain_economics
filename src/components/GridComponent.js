@@ -73,6 +73,13 @@ class Grid extends Component {
         }
     }
 
+    async getAllOptions(contract, signer){
+        const optionsContractWithSigner = contract.connect(signer);
+        console.log("here")
+        await optionsContractWithSigner.getCallOpts().then(e => this.setState({allCallOptions : e}));
+        await optionsContractWithSigner.getPutOpts().then(e => this.setState({allPutOptions : e}));
+    }
+
     async getCurrentConnectedWallet(){
         if (typeof window != "undefined" && typeof window.ethereum != "undefined") {
             try {
@@ -81,9 +88,7 @@ class Grid extends Component {
                 // get accounts
                 const accounts = await provider.send("eth_requestAccounts", []);
                 // set values in the state
-                const optionsContractWithSigner = options(provider).connect(provider.getSigner());
-                await optionsContractWithSigner.getCallOpts().then(e => this.setState({allCallOptions : e}));
-                await optionsContractWithSigner.getPutOpts().then(e => this.setState({allPutOptions : e}));
+                this.getAllOptions(options(provider), provider.getSigner())
                 if (accounts.length > 0) {
                     this.setState({signer: provider.getSigner(), walletAddress: accounts[0], faucet: faucet(provider), options: options(provider), buttonConnection: "Connected"});
                 } else {
@@ -185,13 +190,16 @@ class Grid extends Component {
         }
     };
 
-    async buyCallOptionOCTHandler () {
+    async buyCallOptionOCTHandler (id) {
         this.setState({orderError: "", orderSuccess: ""});
         try {
             const optionsContractWithSigner = this.state.options.connect(this.state.signer);
-            const resp = await optionsContractWithSigner.getCallOpts().then(e => console.log(e));
+            const resp = await optionsContractWithSigner.buyCall(id, {gasLimit: 300000}).then(e => {
+                this.getAllOptions(this.state.options, this.state.signer);
+                return e.hash});
             this.setState({transactionData: resp, orderSuccess: `Buy order was created`});
         } catch (err) {
+            console.log(err)
             this.setState({orderError: err.message});
         }
     };

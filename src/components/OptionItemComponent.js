@@ -22,7 +22,7 @@ class OptionItemComponent extends Component{
                             <Row>
                                 <Col xs={3}>Strike: </Col>
                                 <Col xs={9}>
-                                    {this.props.item.strike}
+                                    {this.props.item.strike} USDUZH
                                 </Col>
                             </Row>
                             <Row style={myStyle}>
@@ -34,13 +34,13 @@ class OptionItemComponent extends Component{
                             <Row>
                                 <Col xs={3}>Premium: </Col>
                                 <Col xs={9}>
-                                    {this.props.item.premium}
+                                    {this.props.item.premium} USDUZH
                                 </Col>
                             </Row>
                             <Row>
                                 <Col xs={3}>Cost: </Col>
                                 <Col xs={9}>
-                                    {this.props.item.costToExercise}
+                                    {this.props.item.costToExercise} (Call: USDUZH | Put UZHETH)
                                 </Col>
                             </Row>
                         </Col>

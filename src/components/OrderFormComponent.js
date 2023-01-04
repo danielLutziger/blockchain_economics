@@ -12,7 +12,6 @@ import {
     Overlay, CardGroup
 } from "react-bootstrap";
 import Form from 'react-bootstrap/Form';
-import EthereumPriceChartComponent from "./EthereumPriceChartComponent";
 
 class OrderFormComponent extends Component {
 
@@ -189,11 +188,6 @@ class OrderFormComponent extends Component {
 
                                 }
                             </Container>
-                        </Card>
-                    </Row>
-                    <Row>
-                        <Card bg={this.props.layoutMode}>
-                            <EthereumPriceChartComponent ethPriceData={this.props.ethPriceData}/>
                         </Card>
                     </Row>
                 </Stack>

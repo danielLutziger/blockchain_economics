@@ -10,7 +10,8 @@ class OfferListComponent extends Component {
         this.props.buyCallOption(id);
     }
     render() {
-        const filtered = this.props.allCallOptions.filter(e => {return (e.buyer === emptyAddress && !e.canceled && !e.exercised && new Date(e.expiry.toNumber() * 1000) > Date.now())});
+        const filteredCalls = this.props.allCallOptions.filter(e => {return (e.buyer === emptyAddress && !e.canceled && !e.exercised && new Date(e.expiry.toNumber() * 1000) > Date.now())});
+        const filteredPuts = this.props.allPutOptions.filter(e => {return (e.buyer === emptyAddress && !e.canceled && !e.exercised && new Date(e.expiry.toNumber() * 1000) > Date.now())});
         return (
             <Container>
                 <Stack gap={3}>
@@ -26,7 +27,7 @@ class OfferListComponent extends Component {
                         <Col>
                             <ListGroup>
                                 {
-                                    filtered.map((option, id) => {
+                                    filteredCalls.map((option) => {
                                         const item = {
                                             id: option.id.toNumber(),
                                             type: "Call",
@@ -35,7 +36,7 @@ class OfferListComponent extends Component {
                                             premium: ethers.utils.formatEther(option.premium),
                                             strike: ethers.utils.formatEther(option.strike),
                                             amount: ethers.utils.formatEther(option.tknAmt),
-                                            writer: option.writer,
+                                            seller: option.seller,
                                             expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
                                         }
                                         return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} buyCallOption={this.buyCallOption.bind(this)}/>)
@@ -45,6 +46,24 @@ class OfferListComponent extends Component {
                         </Col>
                         <Col>
 
+                            <ListGroup>
+                                {
+                                    filteredPuts.map((option) => {
+                                        const item = {
+                                            id: option.id.toNumber(),
+                                            type: "Put",
+                                            buyer : option.buyer,
+                                            costToExercise: ethers.utils.formatEther(option.costToExercise),
+                                            premium: ethers.utils.formatEther(option.premium),
+                                            strike: ethers.utils.formatEther(option.strike),
+                                            amount: ethers.utils.formatEther(option.tknAmt),
+                                            seller: option.seller,
+                                            expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
+                                        }
+                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} buyCallOption={this.buyCallOption.bind(this)}/>)
+                                    })
+                                }
+                            </ListGroup>
                         </Col>
                     </Row>
                 </Stack>

@@ -7,6 +7,7 @@ import FaucetComponent from "./FaucetComponent";
 import OfferListComponent from "./OfferListComponent";
 import OrderFormComponent from "./OrderFormComponent";
 import USDExchangeComponent from "./USDExchangeComponent";
+import PersonalComponent from "./PersonalComponent";
 // contracts abi
 import options from "../contracts/options/options"
 import faucet from "../contracts/faucet/faucet";
@@ -39,6 +40,8 @@ class Grid extends Component {
             showConnectionError: false,
             ethPriceData: [],
             allCallOptions: [],
+            allPutOptions: [],
+            currentUSDETHPrice: 0,
             target: null
         };
     }
@@ -80,6 +83,7 @@ class Grid extends Component {
                 // set values in the state
                 const optionsContractWithSigner = options(provider).connect(provider.getSigner());
                 await optionsContractWithSigner.getCallOpts().then(e => this.setState({allCallOptions : e}));
+                await optionsContractWithSigner.getPutOpts().then(e => this.setState({allPutOptions : e}));
                 if (accounts.length > 0) {
                     this.setState({signer: provider.getSigner(), walletAddress: accounts[0], faucet: faucet(provider), options: options(provider), buttonConnection: "Connected"});
                 } else {
@@ -146,10 +150,10 @@ class Grid extends Component {
 
             const optionsContractWithSigner = this.state.options.connect(this.state.signer);
             const valueInWei = ethers.utils.parseEther(option.tknAmnt.toString());
-            const tokenAmountInWei = option.tknAmnt;
+            const tokenAmountInWei = ethers.utils.parseEther(option.tknAmnt.toString());
             const type = option.type;
-            const strikePriceInWei = option.strikePrice
-            const premiumInWei = option.premium;
+            const strikePriceInWei = ethers.utils.parseEther(option.strikePrice.toString());
+            const premiumInWei = ethers.utils.parseEther(option.premium.toString());
             const date =  new Date(option.expiration).getTime() / 1000;
             let resp;
             if (type === "call"){
@@ -170,11 +174,12 @@ class Grid extends Component {
         this.setState({orderError: "", orderSuccess: ""});
 
         try {
+            const currentUSDETHPrice= await axios.get("https://min-api.cryptocompare.com/data/pricemultifull?fsyms=ETH&tsyms=USD").then(e => {return e.data.RAW.ETH.USD.PRICE})
             const optionsContractWithSigner = this.state.options.connect(this.state.signer);
             const exchangeAmountInWei = ethers.utils.parseEther(option.exchangeAmount.toString());
             const resp = await optionsContractWithSigner.buyUZH({value: exchangeAmountInWei})
                     .then(e => {return e.hash});
-            this.setState({transactionData: resp, orderSuccess: `Order was created`});
+            this.setState({currentUSDETHPrice: currentUSDETHPrice, transactionData: resp, orderSuccess: `Order was created`});
         } catch (err) {
             this.setState({orderError: err.message});
         }
@@ -210,8 +215,9 @@ class Grid extends Component {
                                 <Nav className="mr-auto">
                                     <Nav.Link href="/">Home</Nav.Link>
                                     <Nav.Link href="/faucet">Faucet</Nav.Link>
-                                    <Nav.Link href="/order">Buy / sell options</Nav.Link>
-                                    <Nav.Link href="/list">All Options</Nav.Link>
+                                    <Nav.Link href="/order">Sell Options</Nav.Link>
+                                    <Nav.Link href="/list">Buy Options</Nav.Link>
+                                    <Nav.Link href="/boughtAndSold">Your Options</Nav.Link>
                                     <Nav.Link href="/usdExchange">Exchange To USD</Nav.Link>
                                 </Nav>
                             </Navbar.Collapse>
@@ -240,8 +246,9 @@ class Grid extends Component {
                         <Route exact path='/' element={<HomeComponent />} />
                         <Route exact path='/faucet' element={<FaucetComponent faucet={this.state.faucet} withdrawError={this.state.withdrawError} withdrawSuccess={this.state.withdrawSuccess} walletAddress={this.state.walletAddress} getOCTHandler={this.getFaucetOCTHandler.bind(this)} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode}/>} />
                         <Route exact path='/order' element={<OrderFormComponent executeOption={this.getOptionsOCTHandler.bind(this)} creationError={this.state.creationError} creationSuccess={this.state.creationSuccess} walletAddress={this.state.walletAddress} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
-                        <Route exact path='/usdExchange' element={<USDExchangeComponent executeOrder={this.getUSDOCTHandler.bind(this)} orderError={this.state.orderError} orderSuccess={this.state.orderSuccess} walletAddress={this.state.walletAddress} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
-                        <Route exact path='/list' element={<OfferListComponent buyCallOption={this.buyCallOptionOCTHandler.bind(this)} allCallOptions={this.state.allCallOptions} layoutMode={this.state.layoutMode}/>} />
+                        <Route exact path='/usdExchange' element={<USDExchangeComponent executeOrder={this.getUSDOCTHandler.bind(this)} currentUSDETHPrice={this.state.currentUSDETHPrice} orderError={this.state.orderError} orderSuccess={this.state.orderSuccess} walletAddress={this.state.walletAddress} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
+                        <Route exact path='/list' element={<OfferListComponent buyCallOption={this.buyCallOptionOCTHandler.bind(this)} allCallOptions={this.state.allCallOptions} allPutOptions={this.state.allPutOptions} layoutMode={this.state.layoutMode}/>} />
+                        <Route exact path='/boughtAndSold' element={<PersonalComponent />} />
                     </Routes>
 
                 </div>

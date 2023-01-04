@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import {Container, Stack, Row, Col, Card, Button, InputGroup, ButtonGroup, CardGroup } from "react-bootstrap";
 import Form from 'react-bootstrap/Form';
 import {usdTokenAddress} from "../utils/Constants"
+import EthereumPriceChartComponent from "./EthereumPriceChartComponent";
 
 class USDExchangeComponent extends Component {
 
@@ -21,6 +22,9 @@ class USDExchangeComponent extends Component {
             <div>
                 <p>{msg}</p>
                 <p>Transaction Hash: {status}</p>
+                <p>Exchanging UZHETH at current market price using ChainLink</p>
+                <p>Your order has been submitted to the chainlink oracle. The expected amount of USDUZH you will receive is around {this.props.currentUSDETHPrice * this.state.model.exchangeAmount}.
+                Please be aware that the amount may fluctuate due to delay of the oracle. Thanks.</p>
             </div>);
     }
 
@@ -128,6 +132,11 @@ class USDExchangeComponent extends Component {
                                 </Card.Text>
                             </Card>
                         </Col>
+                    </Row>
+                    <Row>
+                        <Card bg={this.props.layoutMode}>
+                            <EthereumPriceChartComponent ethPriceData={this.props.ethPriceData}/>
+                        </Card>
                     </Row>
                 </Stack>
             </Container>

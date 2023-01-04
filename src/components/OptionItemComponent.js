@@ -64,7 +64,7 @@ class OptionItemComponent extends Component{
                         <Col xs={9}>
                             <Row>
                                 <Col xs={2}>Seller:</Col>
-                                <Col xs={9}>{this.props.item.writer}</Col>
+                                <Col xs={9}>{this.props.item.seller}</Col>
                             </Row>
                         </Col>
                     </Row>

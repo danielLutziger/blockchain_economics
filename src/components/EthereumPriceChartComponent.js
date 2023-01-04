@@ -30,7 +30,7 @@ class EthereumPriceChartComponent extends Component {
             <Chart
                 options={this.state.options}
                 series={this.props.ethPriceData}
-                width="500"
+                width="800"
                 type={"candlestick"}
                 style={{"color":"black"}}
             />

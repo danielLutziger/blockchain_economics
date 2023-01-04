@@ -10,3 +10,7 @@
  * - token amount
  * - exercise button
  */
+
+import {Component} from "react";
+
+class PersonalComponent extends Component{} export default PersonalComponent;

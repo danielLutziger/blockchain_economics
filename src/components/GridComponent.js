@@ -134,18 +134,19 @@ class Grid extends Component {
         try {
 
             const optionsContractWithSigner = this.state.options.connect(this.state.signer);
-            const value = ethers.utils.formatEther(option.tknAmnt);
+            const valueInGwei = ethers.utils.parseEther(option.tknAmnt.toString());
+            const tokenAmountinGwei = ethers.utils.parseEther(option.tknAmnt.toString());
+            const type = option.type;
+            const strikePrice = option.strikePrice;
+            const premium = option.premium;
+            const date =  new Date(option.expiration).getTime() / 1000;
 
-            const resp = await optionsContractWithSigner.sellOption(option.type, option.strikePrice, option.premium, new Date(option.expiration).getTime() / 1000, option.tknAmnt)
-                .send({ value: value })
-                .then(function(receipt) {
-                    console.log(receipt);
-                });
+            const resp = await optionsContractWithSigner.sellOption(type, strikePrice, premium, date, tokenAmountinGwei, {value: valueInGwei})
+                .then(e => console.log(e));
             console.log(resp.hash);
-            this.setState({transactionData: resp.hash, withdrawSuccess: "Operation succeeded - it might take a minute or two but enjoy your tokens!"});
+            this.setState({transactionData: resp.hash, creationSuccess: `${type} was created`});
         } catch (err) {
-            console.log("shit")
-            this.setState({withdrawError: err.message});
+            this.setState({creationError: err.message});
         }
     };
 

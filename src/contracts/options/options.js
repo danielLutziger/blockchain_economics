@@ -1,48 +1,8 @@
 // Local instance of the faucet contract
 import { ethers } from "ethers";
 
-const optionsAddress = "0x6c870F545507aaebfB76085Cc07844925fC2E3E0";
+const optionsAddress = "0x7ac45159a7221A956DF4C4C667DeAaA02b6Cc401";
 const optionsAbi = [
-    {
-        "inputs": [],
-        "name": "acceptOwnership",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "buyUZH",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "id",
-                "type": "uint256"
-            }
-        ],
-        "name": "cancelCall",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "id",
-                "type": "uint256"
-            }
-        ],
-        "name": "cancelPut",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
     {
         "inputs": [],
         "stateMutability": "nonpayable",
@@ -88,35 +48,17 @@ const optionsAbi = [
         "type": "event"
     },
     {
+        "anonymous": false,
         "inputs": [
             {
-                "internalType": "bytes32",
-                "name": "_requestId",
-                "type": "bytes32"
-            },
-            {
+                "indexed": false,
                 "internalType": "uint256",
-                "name": "_ethPrice",
+                "name": "id",
                 "type": "uint256"
             }
         ],
-        "name": "fullfillETH",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "getEthereumPrice",
-        "outputs": [
-            {
-                "internalType": "bytes32",
-                "name": "requestId",
-                "type": "bytes32"
-            }
-        ],
-        "stateMutability": "nonpayable",
-        "type": "function"
+        "name": "OptionBought",
+        "type": "event"
     },
     {
         "anonymous": false,
@@ -142,6 +84,19 @@ const optionsAbi = [
             }
         ],
         "name": "OptionCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "OptionExercised",
         "type": "event"
     },
     {
@@ -183,72 +138,43 @@ const optionsAbi = [
         "type": "event"
     },
     {
+        "inputs": [],
+        "name": "acceptOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "internalType": "uint256",
-                "name": "strike",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "premium",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "expiry",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "tknAmt",
+                "name": "id",
                 "type": "uint256"
             }
         ],
-        "name": "sellCall",
+        "name": "buyCall",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "buyPut",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "buyUZH",
         "outputs": [],
         "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "strike",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "premium",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "expiry",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "tknAmt",
-                "type": "uint256"
-            }
-        ],
-        "name": "sellPut",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "to",
-                "type": "address"
-            }
-        ],
-        "name": "transferOwnership",
-        "outputs": [],
-        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -303,7 +229,7 @@ const optionsAbi = [
             },
             {
                 "internalType": "address payable",
-                "name": "writer",
+                "name": "seller",
                 "type": "address"
             },
             {
@@ -313,6 +239,32 @@ const optionsAbi = [
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "cancelCall",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "cancelPut",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -329,16 +281,47 @@ const optionsAbi = [
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "getBalance",
-        "outputs": [
+        "inputs": [
             {
                 "internalType": "uint256",
-                "name": "",
+                "name": "id",
                 "type": "uint256"
             }
         ],
-        "stateMutability": "view",
+        "name": "exerciseCall",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "exercisePut",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "_requestId",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_ethPrice",
+                "type": "uint256"
+            }
+        ],
+        "name": "fullfillETH",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -389,7 +372,7 @@ const optionsAbi = [
                     },
                     {
                         "internalType": "address payable",
-                        "name": "writer",
+                        "name": "seller",
                         "type": "address"
                     },
                     {
@@ -404,6 +387,19 @@ const optionsAbi = [
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getEthereumPrice",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "requestId",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -454,7 +450,7 @@ const optionsAbi = [
                     },
                     {
                         "internalType": "address payable",
-                        "name": "writer",
+                        "name": "seller",
                         "type": "address"
                     },
                     {
@@ -536,7 +532,7 @@ const optionsAbi = [
             },
             {
                 "internalType": "address payable",
-                "name": "writer",
+                "name": "seller",
                 "type": "address"
             },
             {
@@ -546,6 +542,75 @@ const optionsAbi = [
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "strike",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "premium",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "expiry",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tknAmt",
+                "type": "uint256"
+            }
+        ],
+        "name": "sellCall",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "strike",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "premium",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "expiry",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tknAmt",
+                "type": "uint256"
+            }
+        ],
+        "name": "sellPut",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "to",
+                "type": "address"
+            }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     }
 ]

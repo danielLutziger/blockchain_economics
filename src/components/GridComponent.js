@@ -33,10 +33,12 @@ class Grid extends Component {
             creationError: "",
             creationSuccess: "",
             orderError: "",
+            buttonConnection: "Connect to you Wallet",
             orderSuccess: "",
             transactionData: "",
             showConnectionError: false,
             ethPriceData: [],
+            allCallOptions: [],
             target: null
         };
     }
@@ -55,10 +57,12 @@ class Grid extends Component {
                 // get accounts
                 const accounts = await provider.send("eth_requestAccounts", []);
                 // set values in the state
-                this.setState({signer: provider.getSigner(), walletAddress: accounts[0], faucet: faucet(provider), options: options(provider)});
+                const optionsContractWithSigner = options(provider).connect(provider.getSigner());
+                await optionsContractWithSigner.getCallOpts().then(e => this.setState({allCallOptions : e}));
+                this.setState({signer: provider.getSigner(), walletAddress: accounts[0], faucet: faucet(provider), options: options(provider), buttonConnection: "Connected"});
             } catch (err) {
                 console.error(err.message);
-                this.setState({showConnectionError: !this.state.showConnectionError, target: event.target});
+                this.setState({showConnectionError: !this.state.showConnectionError, target: event.target, buttonConnection: "Connect to you Wallet"});
             }
         } else {
             console.log("Please install MetaMask");
@@ -74,10 +78,12 @@ class Grid extends Component {
                 // get accounts
                 const accounts = await provider.send("eth_requestAccounts", []);
                 // set values in the state
+                const optionsContractWithSigner = options(provider).connect(provider.getSigner());
+                await optionsContractWithSigner.getCallOpts().then(e => this.setState({allCallOptions : e}));
                 if (accounts.length > 0) {
-                    this.setState({signer: provider.getSigner(), walletAddress: accounts[0], faucet: faucet(provider), options: options(provider)});
+                    this.setState({signer: provider.getSigner(), walletAddress: accounts[0], faucet: faucet(provider), options: options(provider), buttonConnection: "Connected"});
                 } else {
-                    console.log("Connect to MetaMask using the Connect Wallet button")
+
                 }
             } catch (err) {
                 console.error(err.message);
@@ -89,6 +95,7 @@ class Grid extends Component {
 
     componentDidMount (){
         if (typeof window != "undefined" && typeof window.ethereum != "undefined") {
+            this.getCurrentConnectedWallet();
             window.ethereum.on("accountsChanged", (accounts) => {
                 this.getCurrentConnectedWallet();
                 this.setState({walletAddress: accounts[0]});
@@ -105,7 +112,7 @@ class Grid extends Component {
             const options = {
                 "headers": {'X-CoinAPI-Key': '0B18330A-C219-46D0-9550-4D61C25EDEDC'}
             }
-            axios.get(`https://rest.coinapi.io/v1/exchangerate/ETH/USD/history?period_id=10MIN&time_start=${this.getDateForSeries(7)}T00:00:00&time_end=${this.getDateForSeries(0)}T00:00:00`, options)
+            axios.get(`https://rest.coinapi.io/v1/exchangerate/ETH/USD/history?period_id=1DAY&time_start=${this.getDateForSeries(30)}T00:00:00&time_end=${this.getDateForSeries(0)}T00:00:00`, options)
                 .then(res => {
                     let dataPoints = []
                     res.data.forEach(e => {
@@ -139,10 +146,10 @@ class Grid extends Component {
 
             const optionsContractWithSigner = this.state.options.connect(this.state.signer);
             const valueInWei = ethers.utils.parseEther(option.tknAmnt.toString());
-            const tokenAmountInWei = ethers.utils.parseEther(option.tknAmnt.toString());
+            const tokenAmountInWei = option.tknAmnt;
             const type = option.type;
-            const strikePriceInWei = ethers.utils.parseEther(option.strikePrice.toString());
-            const premiumInWei = ethers.utils.parseEther(option.premium.toString());
+            const strikePriceInWei = option.strikePrice
+            const premiumInWei = option.premium;
             const date =  new Date(option.expiration).getTime() / 1000;
             let resp;
             if (type === "call"){
@@ -152,7 +159,6 @@ class Grid extends Component {
                 resp = await optionsContractWithSigner.sellPut(strikePriceInWei, premiumInWei, date, tokenAmountInWei)
                     .then(e => {return e.hash});
             }
-            console.log(resp.hash);
             this.setState({transactionData: resp, creationSuccess: `${type} was created`});
         } catch (err) {
             this.setState({creationError: err.message});
@@ -169,6 +175,17 @@ class Grid extends Component {
             const resp = await optionsContractWithSigner.buyUZH({value: exchangeAmountInWei})
                     .then(e => {return e.hash});
             this.setState({transactionData: resp, orderSuccess: `Order was created`});
+        } catch (err) {
+            this.setState({orderError: err.message});
+        }
+    };
+
+    async buyCallOptionOCTHandler () {
+        this.setState({orderError: "", orderSuccess: ""});
+        try {
+            const optionsContractWithSigner = this.state.options.connect(this.state.signer);
+            const resp = await optionsContractWithSigner.getCallOpts().then(e => console.log(e));
+            this.setState({transactionData: resp, orderSuccess: `Buy order was created`});
         } catch (err) {
             this.setState({orderError: err.message});
         }
@@ -198,8 +215,8 @@ class Grid extends Component {
                                     <Nav.Link href="/usdExchange">Exchange To USD</Nav.Link>
                                 </Nav>
                             </Navbar.Collapse>
-                            <Button className="justify-content-end" variant={this.state.elementMode} onClick={this.connectToWallet.bind(this)}>
-                                Connect to you Wallet
+                            <Button className="justify-content-end" variant={this.state.elementMode} onClick={this.connectToWallet.bind(this)} disabled={this.state.buttonConnection === "Connected"}>
+                                {this.state.buttonConnection}
                             </Button>
                             {/* handling exceptions when connecting */}
                             <Overlay
@@ -224,7 +241,7 @@ class Grid extends Component {
                         <Route exact path='/faucet' element={<FaucetComponent faucet={this.state.faucet} withdrawError={this.state.withdrawError} withdrawSuccess={this.state.withdrawSuccess} walletAddress={this.state.walletAddress} getOCTHandler={this.getFaucetOCTHandler.bind(this)} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode}/>} />
                         <Route exact path='/order' element={<OrderFormComponent executeOption={this.getOptionsOCTHandler.bind(this)} creationError={this.state.creationError} creationSuccess={this.state.creationSuccess} walletAddress={this.state.walletAddress} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
                         <Route exact path='/usdExchange' element={<USDExchangeComponent executeOrder={this.getUSDOCTHandler.bind(this)} orderError={this.state.orderError} orderSuccess={this.state.orderSuccess} walletAddress={this.state.walletAddress} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
-                        <Route exact path='/list' element={<OfferListComponent />} />
+                        <Route exact path='/list' element={<OfferListComponent buyCallOption={this.buyCallOptionOCTHandler.bind(this)} allCallOptions={this.state.allCallOptions} layoutMode={this.state.layoutMode}/>} />
                     </Routes>
 
                 </div>

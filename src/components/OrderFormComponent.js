@@ -23,6 +23,7 @@ class OrderFormComponent extends Component {
                 strikePrice: "",
                 premium: "",
                 expiration: "",
+                expirationTime: "",
                 tknAmnt: "",
                 exercised: "",
                 canceled: "",
@@ -47,8 +48,13 @@ class OrderFormComponent extends Component {
     }
 
     executeOption(event){
+        let enteredDate = new Date(this.state.model.expiration)
+        enteredDate.setHours(this.state.model.expirationTime.split(':')[0])
+        enteredDate.setMinutes(this.state.model.expirationTime.split(':')[1])
+
+        this.inputChangeHandler('expiration', enteredDate)
         if (this.state.model.strikePrice > 0 &&  this.state.model.premium > 0
-            && this.state.model.tknAmnt > 0 && new Date(this.state.model.expiration) > new Date(Date.now()) ){
+            && this.state.model.tknAmnt > 0 && enteredDate > new Date(Date.now())){
             this.props.executeOption(this.state.model);
         } else {
             this.setState({showConnectionError: !this.state.showConnectionError, target: event.target});
@@ -132,6 +138,17 @@ class OrderFormComponent extends Component {
                                             placeholder="Enter the expiration date"
                                             type="date"
                                             name="expiration"
+                                            onChange={(e) => this.inputChangeHandler(e.target.name, e.target.value)}
+                                        />
+                                    </InputGroup>
+
+                                    <InputGroup style={myStyle}>
+                                        <InputGroup.Text id="inputGroup-sizing">Expiration Time</InputGroup.Text>
+                                        <Form.Control
+                                            aria-describedby="inputGroup-sizing-sm"
+                                            placeholder="Enter the expiration time"
+                                            type="time"
+                                            name="expirationTime"
                                             onChange={(e) => this.inputChangeHandler(e.target.name, e.target.value)}
                                         />
                                     </InputGroup>

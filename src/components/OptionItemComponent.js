@@ -5,14 +5,14 @@ class OptionItemComponent extends Component{
 
     actionOption(event){
         // cannot buy your own option
-        this.props.actionOption(event.target.id, event.target.name);
+        this.props.actionOption(event.target.id, event.target.name, this.props.item.amount);
     }
 
 
     render(){
         const myStyle = { textAlign: "left"}
         const renderTooltip = (props) => (<Tooltip id="button-tooltip" {...props}>
-            You are either the seller or have insufficient funds
+            {this.props.validationMsg}
         </Tooltip>)
 
         return(
@@ -45,16 +45,11 @@ class OptionItemComponent extends Component{
                                     {this.props.item.premium} USDUZH
                                 </Col>
                             </Row>
-                            <Row>
-                                <Col xs={3}>Cost: </Col>
-                                <Col xs={9}>
-                                    {this.props.item.costToExercise} {this.props.item.type ==="Call" ? "USDUZH" : "UZHETH"}
-                                </Col>
-                            </Row>
                         </Col>
                         <Col xs={3}>
                             <Row>
-                                <Badge bg="danger" pill>
+
+                                <Badge bg= {this.props.date < Date.now() ? "danger" : "dark"} pill>
                                     Expiration date:<br /> {this.props.item.expiration}
                                 </Badge>
                             </Row>
@@ -66,7 +61,7 @@ class OptionItemComponent extends Component{
                                 overlay={renderTooltip}
                                 >
                                 <span className="d-inline-block">
-                                    <Button onClick={this.actionOption.bind(this)} id={this.props.item.id} name={this.props.item.type} variant={"success"} disabled={this.props.disabled} style={{"width": "100%"}}>
+                                    <Button onClick={this.actionOption.bind(this)} id={this.props.item.id} name={this.props.item.type} variant={"outline-success"} disabled={this.props.disabled} style={{"width": "100%"}}>
                                     {this.props.buttonText}
                                     </Button>
                                 </span>
@@ -86,10 +81,18 @@ class OptionItemComponent extends Component{
 
                         </Col>
                         <Col xs={9}>
-                            <Row>
-                                <Col xs={2}>Seller:</Col>
-                                <Col xs={9}>{this.props.item.seller}</Col>
-                            </Row>
+                            {this.props.seller &&
+                                <Row>
+                                    <Col xs={2}>Seller:</Col>
+                                    <Col xs={9}>{this.props.item.seller}</Col>
+                                </Row>
+                            }
+                            {!this.props.seller &&
+                                <Row>
+                                    <Col xs={2}>Buyer:</Col>
+                                    <Col xs={9}>{this.props.item.buyer}</Col>
+                                </Row>
+                            }
                         </Col>
                     </Row>
                 </Container>

@@ -1,7 +1,7 @@
 // Local instance of the faucet contract
 import { ethers } from "ethers";
 
-const optionsAddress = "0x7ac45159a7221A956DF4C4C667DeAaA02b6Cc401";
+const optionsAddress = "0x491B190f810024EEe055631bE99e5921a234C1Bf";
 const optionsAbi = [
     {
         "inputs": [],

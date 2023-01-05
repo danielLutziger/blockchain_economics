@@ -15,11 +15,12 @@ import React, {Component} from "react";
 import {Col, Container, ListGroup, Row, Stack, Modal, Button} from "react-bootstrap";
 import {ethers} from "ethers";
 import OptionItemComponent from "./OptionItemComponent";
+import {emptyAddress} from "../utils/Constants";
 
 class PersonalComponent extends Component{
 
-    executeOption(id, type){
-        this.props.executeOption(id, type);
+    executeOption(id, type, amount){
+        this.props.executeOption(id, type, amount);
     }
 
     cancelOption(id, type){
@@ -50,6 +51,7 @@ class PersonalComponent extends Component{
         const sells = filteredSellsCalls.concat(filteredSellsPuts);
         const buys = filteredBuysCalls.concat(filteredBuysPuts);
 
+
         return (
             <Container>
                 <Stack gap={3}>
@@ -75,9 +77,13 @@ class PersonalComponent extends Component{
                                             strike: ethers.utils.formatEther(option.strike),
                                             amount: ethers.utils.formatEther(option.tknAmt),
                                             seller: option.seller,
-                                            expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
+                                            expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0],
+                                            exercised: option.exercised
                                         }
-                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} actionOption={this.cancelOption.bind(this)} walletAddress={this.props.walletAddress} buttonText={"Cancel"} disabled={false}/>)
+
+                                        const disabled = (item.buyer !== emptyAddress && new Date(option.expiry.toNumber() * 1000) > Date.now()) || option.canceled || item.exercised
+                                        const validationMsg = "You cannot cancel the option because: \n- The option already bought\n- The option was already cancelled\n- The option's expiration date is in the past"
+                                        return (<OptionItemComponent date={option.expiry.toNumber() * 1000} seller={false} item={item} key={item.id} validationMsg={validationMsg} layoutMode={this.props.layoutMode} actionOption={this.cancelOption.bind(this)} walletAddress={this.props.walletAddress} buttonText={"Cancel"} disabled={disabled}/>)
                                     })
                                 }
                             </ListGroup>
@@ -96,9 +102,13 @@ class PersonalComponent extends Component{
                                             strike: ethers.utils.formatEther(option.strike),
                                             amount: ethers.utils.formatEther(option.tknAmt),
                                             seller: option.seller,
-                                            expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
+                                            expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0],
+                                            exercised: option.exercised
                                         }
-                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} actionOption={this.executeOption.bind(this)} walletAddress={this.props.walletAddress} buttonText={"Execute"} disabled={false}/>)
+
+                                        const disabled = new Date(option.expiry.toNumber() * 1000) < Date.now() || item.exercised
+                                        const validationMsg = "You cannot execute the option because: \n- The option already expired\n- The option was already exercised"
+                                        return (<OptionItemComponent date={option.expiry.toNumber() * 1000} seller={true} item={item} key={item.id} layoutMode={this.props.layoutMode} validationMsg={validationMsg} actionOption={this.executeOption.bind(this)} walletAddress={this.props.walletAddress} buttonText={"Exercise"} disabled={disabled}/>)
                                     })
                                 }
                             </ListGroup>

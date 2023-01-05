@@ -6,8 +6,8 @@ import {emptyAddress} from "../utils/Constants";
 
 class OfferListComponent extends Component {
 
-    buyCallOption(id, type){
-        this.props.buyCallOption(id, type);
+    buyCallOption(id, type, amount){
+        this.props.buyCallOption(id, type, amount);
     }
     render() {
         const filteredCalls = this.props.allCallOptions.filter(e => {return (e.buyer === emptyAddress && !e.canceled && !e.exercised && new Date(e.expiry.toNumber() * 1000) > Date.now())});
@@ -39,9 +39,10 @@ class OfferListComponent extends Component {
                                             seller: option.seller,
                                             expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
                                         }
-                                        const disabled = this.props.walletAddress.toLowerCase() === item.seller.toLowerCase() //|| this.props.usdBalance < this.props.item.premium
 
-                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} walletAddress={this.props.walletAddress} actionOption={this.buyCallOption.bind(this)} buttonText={"Buy"} disabled={disabled}/>)
+                                        const disabled = this.props.walletAddress.toLowerCase() === item.seller.toLowerCase() && this.props.usdBalance < item.premium
+                                        const validationMsg = "You are either the seller or have insufficient funds"
+                                        return (<OptionItemComponent seller={true} item={item} key={item.id} validationMsg={validationMsg} date={option.expiry.toNumber() * 1000} layoutMode={this.props.layoutMode} walletAddress={this.props.walletAddress} actionOption={this.buyCallOption.bind(this)} buttonText={"Buy"} disabled={disabled}/>)
                                     })
                                 }
                             </ListGroup>
@@ -63,7 +64,8 @@ class OfferListComponent extends Component {
                                             expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
                                         }
                                         const disabled = this.props.walletAddress.toLowerCase() === item.seller.toLowerCase() //|| this.props.usdBalance < this.props.item.premium
-                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} walletAddress={this.props.walletAddress} usdBalance={this.props.usdBalance} actionOption={this.buyCallOption.bind(this)} buttonText={"Buy"} disabled={disabled}/>)
+                                        const validationMsg = "You are either the seller or have insufficient funds"
+                                        return (<OptionItemComponent seller={true} item={item} key={item.id} validationMsg={validationMsg} date={option.expiry.toNumber() * 1000} layoutMode={this.props.layoutMode} walletAddress={this.props.walletAddress} usdBalance={this.props.usdBalance} actionOption={this.buyCallOption.bind(this)} buttonText={"Buy"} disabled={disabled}/>)
                                     })
                                 }
                             </ListGroup>

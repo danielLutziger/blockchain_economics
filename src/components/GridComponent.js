@@ -15,6 +15,7 @@ import "../App.css";
 import UZHBlockchain from '../UZHBlockchain.png'
 import {ethers} from "ethers";
 import axios from "axios";
+import usdUZHContract from "../contracts/usduzh/usduzh";
 
 
 class Grid extends Component {
@@ -65,7 +66,9 @@ class Grid extends Component {
                 // set values in the state
                 const optionsContractWithSigner = options(provider).connect(provider.getSigner());
                 await optionsContractWithSigner.getCallOpts().then(e => this.setState({allCallOptions : e}));
-                this.setState({signer: provider.getSigner(), walletAddress: accounts[0], faucet: faucet(provider), options: options(provider), buttonConnection: "Connected"});
+                const usduzh = usdUZHContract(provider).connect(provider.getSigner());
+                await usduzh.balanceOf(accounts[0]).then(e => this.setState({balance : e}));
+                this.setState({signer: provider.getSigner(), walletAddress: accounts[0], faucet: faucet(provider), options: options(provider), usdContract: usdUZHContract(provider), buttonConnection: "Connected"});
             } catch (err) {
                 console.error(err.message);
                 this.setState({showConnectionError: !this.state.showConnectionError, target: event.target, buttonConnection: "Connect to you Wallet"});
@@ -80,8 +83,14 @@ class Grid extends Component {
         const optionsContractWithSigner = contract.connect(signer);
         await optionsContractWithSigner.getCallOpts().then(e => this.setState({allCallOptions : e}));
         await optionsContractWithSigner.getPutOpts().then(e => this.setState({allPutOptions : e}));
-        console.log(optionsContractWithSigner)
-        //await optionsContractWithSigner.getBalance().then(e => this.setState({balance : e}));
+    }
+
+    async getUSDUZHBalance(contract, signer){
+        const usduzh = contract.connect(signer);
+        await usduzh.balanceOf(this.state.walletAddress.toLowerCase()).then(e => {
+            this.setState({balance : ethers.utils.formatEther(e)})
+            console.log(ethers.utils.formatEther(e))
+        });
     }
 
     async getCurrentConnectedWallet(){
@@ -92,7 +101,8 @@ class Grid extends Component {
                 // get accounts
                 const accounts = await provider.send("eth_requestAccounts", []);
                 // set values in the state
-                this.getAllOptions(options(provider), provider.getSigner())
+                this.getAllOptions(options(provider), provider.getSigner());
+                this.getUSDUZHBalance(usdUZHContract(provider), provider.getSigner());
                 if (accounts.length > 0) {
                     this.setState({signer: provider.getSigner(), walletAddress: accounts[0], faucet: faucet(provider), options: options(provider), buttonConnection: "Connected"});
                 } else {
@@ -163,7 +173,11 @@ class Grid extends Component {
             const type = option.type;
             const strikePriceInWei = ethers.utils.parseEther(option.strikePrice.toString());
             const premiumInWei = ethers.utils.parseEther(option.premium.toString());
-            const date =  new Date(option.expiration).getTime() / 1000;
+            let date = new Date(option.expiration);
+            date.setHours(option.expirationTime.split(':')[0]);
+            date.setMinutes(option.expirationTime.split(':')[1]);
+            date = date.getTime() / 1000;
+            console.log(date);
             let resp;
             if (type === "Call"){
                 resp = await optionsContractWithSigner.sellCall(strikePriceInWei, premiumInWei, date, tokenAmountInWei, {value: valueInWei})
@@ -212,11 +226,7 @@ class Grid extends Component {
         }
     };
 
-    async executeOptionOCTHandler (id, type) {
-        console.log("execute");
-        console.log(id);
-        console.log(type);
-        this.setState({personalError: "", personalSuccess: ""});
+    async executeOptionOCTHandler (id, type, amount) {
         try {
             const optionsContractWithSigner = this.state.options.connect(this.state.signer);
             let resp;
@@ -224,34 +234,42 @@ class Grid extends Component {
                 resp = await optionsContractWithSigner.exerciseCall(id, {gasLimit: 300000}).then(e => {
                     return e.hash});
             } else {
-                //const valueInWei = ethers.utils.parseEther(option.tknAmnt.toString());
-                resp = await optionsContractWithSigner.exercisePut(id, {gasLimit: 300000}).then(e => {
+                const valueInWei = ethers.utils.parseEther(amount.toString());
+                resp = await optionsContractWithSigner.exercisePut(id, {value: valueInWei, gasLimit: 300000}).then(e => {
                     return e.hash});
             }
-            this.setState({transactionData: resp, personalSuccess: `Action was successful`});
+            this.setState({transactionData: resp, modalMsg: `${type} was executed`, showModal: true});
         } catch (err) {
             console.log(err)
-            this.setState({personalError: err.message});
+            this.setState({modalMsg: err.message, showModal: true});
         }
     };
 
     async cancelOptionOCTHandler (id, type) {
-        console.log("cancel");
-        console.log(id);
-        console.log(type);
-        //cancelCall
-        //cancelPut
+        try {
+            const optionsContractWithSigner = this.state.options.connect(this.state.signer);
+            let resp;
+            if (type === "Call"){
+                resp = await optionsContractWithSigner.cancelCall(id, {gasLimit: 300000}).then(e => {
+                    return e.hash});
+            } else {
+                resp = await optionsContractWithSigner.cancelPut(id, {gasLimit: 300000}).then(e => {
+                    return e.hash});
+            }
+            this.setState({transactionData: resp, modalMsg: `${type} was cancelled`, showModal: true});
+        } catch (err) {
+            console.log(err)
+            this.setState({modalMsg: err.message, showModal: true});
+        }
     };
 
     handleClose(){
-        console.log("hi")
         this.setState({showModal : false});
     }
 
     /**
      * TODO: check the usd balance in offerlist component (usd contract required)
-     * TODO: execute call & put options
-     * TODO: cancel offered options
+     * TODO: execute put options
      */
 
     render() {

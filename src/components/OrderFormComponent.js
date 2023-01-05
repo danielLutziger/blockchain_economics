@@ -19,7 +19,7 @@ class OrderFormComponent extends Component {
         super(props);
         this.state = {
             model: {
-                type: "call",
+                type: "Call",
                 strikePrice: "",
                 premium: "",
                 expiration: "",
@@ -66,8 +66,8 @@ class OrderFormComponent extends Component {
     render() {
         const myStyle = {marginTop: "1rem", marginBottom: "1rem"}
         const radios = [
-            { name: 'Sell Call Option', value: 'call' },
-            { name: 'Sell Put Option', value: 'put' },
+            { name: 'Sell Call Option', value: 'Call' },
+            { name: 'Sell Put Option', value: 'Put' },
         ];
 
         const transactionMode = this.props.creationError ? "danger" : this.props.creationSuccess ? "success" : "";
@@ -92,7 +92,7 @@ class OrderFormComponent extends Component {
                                                     key={idx}
                                                     id={`radio-${idx}`}
                                                     type="radio"
-                                                    variant={idx % 2 ? 'outline-warning' : 'outline-info'}
+                                                    variant={idx % 2 ? 'outline-danger' : 'outline-success'}
                                                     name="type"
                                                     value={radio.value}
                                                     checked={this.state.model.type === radio.value}
@@ -148,7 +148,7 @@ class OrderFormComponent extends Component {
                                     </InputGroup>
 
                                     <Button
-                                        variant="primary"
+                                        variant="outline-light"
                                         type="submit"
                                         style={myStyle}
                                         onClick={this.executeOption.bind(this)}

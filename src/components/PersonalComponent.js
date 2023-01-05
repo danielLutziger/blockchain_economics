@@ -18,8 +18,12 @@ import OptionItemComponent from "./OptionItemComponent";
 
 class PersonalComponent extends Component{
 
-    buyCallOption(id){
-        this.props.buyCallOption(id);
+    executeOption(id, type){
+        this.props.executeOption(id, type);
+    }
+
+    cancelOption(id, type){
+        this.props.cancelOption(id, type);
     }
 
     objectOfInterest(e, type){
@@ -73,7 +77,7 @@ class PersonalComponent extends Component{
                                             seller: option.seller,
                                             expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
                                         }
-                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} buyCallOption={this.buyCallOption.bind(this)} walletAddress={this.props.walletAddress}/>)
+                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} actionOption={this.cancelOption.bind(this)} walletAddress={this.props.walletAddress} buttonText={"Cancel"} disabled={false}/>)
                                     })
                                 }
                             </ListGroup>
@@ -94,7 +98,7 @@ class PersonalComponent extends Component{
                                             seller: option.seller,
                                             expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
                                         }
-                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} buyCallOption={this.buyCallOption.bind(this)} walletAddress={this.props.walletAddress}/>)
+                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} actionOption={this.executeOption.bind(this)} walletAddress={this.props.walletAddress} buttonText={"Execute"} disabled={false}/>)
                                     })
                                 }
                             </ListGroup>

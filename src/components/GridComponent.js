@@ -163,7 +163,7 @@ class Grid extends Component {
             const premiumInWei = ethers.utils.parseEther(option.premium.toString());
             const date =  new Date(option.expiration).getTime() / 1000;
             let resp;
-            if (type === "call"){
+            if (type === "Call"){
                 resp = await optionsContractWithSigner.sellCall(strikePriceInWei, premiumInWei, date, tokenAmountInWei, {value: valueInWei})
                     .then(e => {return e.hash});
             } else {
@@ -192,19 +192,48 @@ class Grid extends Component {
         }
     };
 
-    async buyCallOptionOCTHandler (id) {
+    async buyOptionOCTHandler (id, type) {
         this.setState({orderError: "", orderSuccess: ""});
         try {
             const optionsContractWithSigner = this.state.options.connect(this.state.signer);
-            const resp = await optionsContractWithSigner.buyCall(id, {gasLimit: 300000}).then(e => {
-                this.getAllOptions(this.state.options, this.state.signer);
-                return e.hash});
+            let resp;
+            if (type === "Call"){
+                resp = await optionsContractWithSigner.buyCall(id, {gasLimit: 300000}).then(e => {
+                    this.getAllOptions(this.state.options, this.state.signer);
+                    return e.hash});
+            } else {
+                resp = await optionsContractWithSigner.buyPut(id, {gasLimit: 300000}).then(e => {
+                    this.getAllOptions(this.state.options, this.state.signer);
+                    return e.hash});
+            }
             this.setState({transactionData: resp, orderSuccess: `Buy order was created`});
         } catch (err) {
             console.log(err)
             this.setState({orderError: err.message});
         }
     };
+
+    async executeOptionOCTHandler (id, type) {
+        console.log("execute");
+        console.log(id);
+        console.log(type);
+        //exerciseCall
+        //exercisePut => add value
+    };
+
+    async cancelOptionOCTHandler (id, type) {
+        console.log("cancel");
+        console.log(id);
+        console.log(type);
+        //cancelCall
+        //cancelPut
+    };
+
+    /**
+     * TODO: check the usd balance in offerlist component (usd contract required)
+     * TODO: execute call & put options
+     * TODO: cancel offered options
+     */
 
     render() {
         return (
@@ -257,8 +286,8 @@ class Grid extends Component {
                         <Route exact path='/faucet' element={<FaucetComponent faucet={this.state.faucet} withdrawError={this.state.withdrawError} withdrawSuccess={this.state.withdrawSuccess} walletAddress={this.state.walletAddress} getOCTHandler={this.getFaucetOCTHandler.bind(this)} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode}/>} />
                         <Route exact path='/order' element={<OrderFormComponent executeOption={this.getOptionsOCTHandler.bind(this)} creationError={this.state.creationError} creationSuccess={this.state.creationSuccess} walletAddress={this.state.walletAddress} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
                         <Route exact path='/usdExchange' element={<USDExchangeComponent executeOrder={this.getUSDOCTHandler.bind(this)} currentUSDETHPrice={this.state.currentUSDETHPrice} orderError={this.state.orderError} orderSuccess={this.state.orderSuccess} walletAddress={this.state.walletAddress} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
-                        <Route exact path='/list' element={<OfferListComponent buyCallOption={this.buyCallOptionOCTHandler.bind(this)} usdBalance={this.state.balance} allCallOptions={this.state.allCallOptions} allPutOptions={this.state.allPutOptions} layoutMode={this.state.layoutMode} walletAddress={this.state.walletAddress} />} />
-                            <Route exact path='/boughtAndSold' element={<PersonalComponent buyCallOption={this.buyCallOptionOCTHandler.bind(this)} allCallOptions={this.state.allCallOptions} allPutOptions={this.state.allPutOptions} layoutMode={this.state.layoutMode} walletAddress={this.state.walletAddress} />} />
+                        <Route exact path='/list' element={<OfferListComponent buyCallOption={this.buyOptionOCTHandler.bind(this)} usdBalance={this.state.balance} allCallOptions={this.state.allCallOptions} allPutOptions={this.state.allPutOptions} layoutMode={this.state.layoutMode} walletAddress={this.state.walletAddress} />} />
+                            <Route exact path='/boughtAndSold' element={<PersonalComponent executeOption={this.executeOptionOCTHandler.bind(this)} cancelOption={this.cancelOptionOCTHandler.bind(this)} allCallOptions={this.state.allCallOptions} allPutOptions={this.state.allPutOptions} layoutMode={this.state.layoutMode} walletAddress={this.state.walletAddress} />} />
                     </Routes>
 
                 </div>

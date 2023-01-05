@@ -3,15 +3,14 @@ import {ListGroup, Badge, Container, Row, Col, Button, OverlayTrigger, Tooltip} 
 
 class OptionItemComponent extends Component{
 
-    buyCallOption(event){
+    actionOption(event){
         // cannot buy your own option
-        this.props.buyCallOption(event.target.id);
+        this.props.actionOption(event.target.id, event.target.name);
     }
 
 
     render(){
         const myStyle = { textAlign: "left"}
-        const disabled = this.props.walletAddress.toLowerCase() === this.props.item.seller.toLowerCase() || this.props.usdBalance < this.props.item.premium
         const renderTooltip = (props) => (<Tooltip id="button-tooltip" {...props}>
             You are either the seller or have insufficient funds
         </Tooltip>)
@@ -60,22 +59,22 @@ class OptionItemComponent extends Component{
                                 </Badge>
                             </Row>
                             <Row style={{"margin-top" : "20px"}}>
-                                {disabled &&
+                                {this.props.disabled &&
                                 <OverlayTrigger
                                 placement="right"
                                 delay={{ show: 250, hide: 400 }}
                                 overlay={renderTooltip}
                                 >
                                 <span className="d-inline-block">
-                                    <Button onClick={this.buyCallOption.bind(this)} id={this.props.item.id} name={this.props.item.id} variant={"success"} disabled={disabled} style={{"width": "100%"}}>
-                                    Buy
+                                    <Button onClick={this.actionOption.bind(this)} id={this.props.item.id} name={this.props.item.type} variant={"success"} disabled={this.props.disabled} style={{"width": "100%"}}>
+                                    {this.props.buttonText}
                                     </Button>
                                 </span>
                                 </OverlayTrigger> }
-                                {disabled ||
+                                {this.props.disabled ||
                                 <span className="d-inline-block">
-                                    <Button onClick={this.buyCallOption.bind(this)} id={this.props.item.id} name={this.props.item.id} variant={"success"} disabled={disabled} style={{"width": "100%"}}>
-                                    Buy
+                                    <Button onClick={this.actionOption.bind(this)} id={this.props.item.id} name={this.props.item.type} variant={"success"} disabled={this.props.disabled} style={{"width": "100%"}}>
+                                    {this.props.buttonText}
                                     </Button>
                                 </span> }
 

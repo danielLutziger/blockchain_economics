@@ -6,8 +6,8 @@ import {emptyAddress} from "../utils/Constants";
 
 class OfferListComponent extends Component {
 
-    buyCallOption(id){
-        this.props.buyCallOption(id);
+    buyCallOption(id, type){
+        this.props.buyCallOption(id, type);
     }
     render() {
         const filteredCalls = this.props.allCallOptions.filter(e => {return (e.buyer === emptyAddress && !e.canceled && !e.exercised && new Date(e.expiry.toNumber() * 1000) > Date.now())});
@@ -39,7 +39,9 @@ class OfferListComponent extends Component {
                                             seller: option.seller,
                                             expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
                                         }
-                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} walletAddress={this.props.walletAddress} buyCallOption={this.buyCallOption.bind(this)}/>)
+                                        const disabled = this.props.walletAddress.toLowerCase() === item.seller.toLowerCase() //|| this.props.usdBalance < this.props.item.premium
+
+                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} walletAddress={this.props.walletAddress} actionOption={this.buyCallOption.bind(this)} buttonText={"Buy"} disabled={disabled}/>)
                                     })
                                 }
                             </ListGroup>
@@ -60,7 +62,8 @@ class OfferListComponent extends Component {
                                             seller: option.seller,
                                             expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
                                         }
-                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} walletAddress={this.props.walletAddress} usdBalance={this.props.usdBalance} buyCallOption={this.buyCallOption.bind(this)}/>)
+                                        const disabled = this.props.walletAddress.toLowerCase() === item.seller.toLowerCase() //|| this.props.usdBalance < this.props.item.premium
+                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} walletAddress={this.props.walletAddress} usdBalance={this.props.usdBalance} actionOption={this.buyCallOption.bind(this)} buttonText={"Buy"} disabled={disabled}/>)
                                     })
                                 }
                             </ListGroup>

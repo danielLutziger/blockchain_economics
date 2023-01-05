@@ -40,9 +40,38 @@ class OfferListComponent extends Component {
                                             expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
                                         }
 
-                                        const disabled = this.props.walletAddress.toLowerCase() === item.seller.toLowerCase() && this.props.usdBalance < item.premium
+                                        const itemStates = {
+                                            expired: {
+                                                bool: new Date(option.expiry.toNumber() * 1000) < Date.now(),
+                                                text: "Expired",
+                                                color: new Date(option.expiry.toNumber() * 1000) < Date.now() ? "success" : "info"
+                                            },
+                                            cancelled: {
+                                                bool: option.canceled,
+                                                text: "Cancelled",
+                                                color: option.canceled ? "success" : "info"
+                                            },
+                                            exercised: {
+                                                bool: option.exercised,
+                                                text: "Exercised",
+                                                color: option.exercised ? "danger" : "info"
+                                            },
+                                            funds: {
+                                                bool: this.props.walletAddress.toLowerCase() !== item.seller.toLowerCase() && parseInt(this.props.usdBalance, 10) < parseInt(ethers.utils.formatEther(option.premium), 10),
+                                                text: "Not enough funds",
+                                                color: "warning"
+                                            },
+                                            buyer: {
+                                                bool: this.props.walletAddress.toLowerCase() === item.seller.toLowerCase(),
+                                                text: this.props.walletAddress.toLowerCase() === item.seller.toLowerCase() ? "Your Offer" : "",
+                                                color: this.props.walletAddress.toLowerCase() === item.seller.toLowerCase() ? "info" : ""
+                                            }
+                                        }
+
+                                        const disabled = this.props.walletAddress.toLowerCase() === item.seller.toLowerCase() || parseInt(this.props.usdBalance, 10) < parseInt(ethers.utils.formatEther(option.premium), 10)
+
                                         const validationMsg = "You are either the seller or have insufficient funds"
-                                        return (<OptionItemComponent seller={true} item={item} key={item.id} validationMsg={validationMsg} date={option.expiry.toNumber() * 1000} layoutMode={this.props.layoutMode} walletAddress={this.props.walletAddress} actionOption={this.buyCallOption.bind(this)} buttonText={"Buy"} disabled={disabled}/>)
+                                        return (<OptionItemComponent itemStates={itemStates} seller={true} item={item} key={item.id} validationMsg={validationMsg} date={option.expiry.toNumber() * 1000} layoutMode={this.props.layoutMode} walletAddress={this.props.walletAddress} actionOption={this.buyCallOption.bind(this)} buttonText={"Buy"} disabled={disabled}/>)
                                     })
                                 }
                             </ListGroup>
@@ -63,9 +92,38 @@ class OfferListComponent extends Component {
                                             seller: option.seller,
                                             expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
                                         }
-                                        const disabled = this.props.walletAddress.toLowerCase() === item.seller.toLowerCase() //|| this.props.usdBalance < this.props.item.premium
+                                        const itemStates = {
+                                            expired: {
+                                                bool: new Date(option.expiry.toNumber() * 1000) < Date.now(),
+                                                text: "Expired",
+                                                color: new Date(option.expiry.toNumber() * 1000) < Date.now() ? "success" : "info"
+                                            },
+                                            cancelled: {
+                                                bool: option.canceled,
+                                                text: "Cancelled",
+                                                color: option.canceled ? "success" : "info"
+                                            },
+                                            exercised: {
+                                                bool: option.exercised,
+                                                text: "Exercised",
+                                                color: option.exercised ? "danger" : "info"
+                                            },
+                                            funds: {
+                                                bool: this.props.walletAddress.toLowerCase() !== item.seller.toLowerCase() && parseInt(this.props.usdBalance, 10) < parseInt(ethers.utils.formatEther(option.premium), 10),
+                                                text: "Not enough funds",
+                                                color: "warning"
+                                            },
+                                            buyer: {
+                                                bool: this.props.walletAddress.toLowerCase() === item.seller.toLowerCase(),
+                                                text: this.props.walletAddress.toLowerCase() === item.seller.toLowerCase() ? "Your Offer" : "",
+                                                color: this.props.walletAddress.toLowerCase() === item.seller.toLowerCase() ? "info" : ""
+                                            }
+                                        }
+
+                                        const disabled = this.props.walletAddress.toLowerCase() === item.seller.toLowerCase() || parseInt(this.props.usdBalance, 10) < parseInt(ethers.utils.formatEther(option.premium), 10)
+
                                         const validationMsg = "You are either the seller or have insufficient funds"
-                                        return (<OptionItemComponent seller={true} item={item} key={item.id} validationMsg={validationMsg} date={option.expiry.toNumber() * 1000} layoutMode={this.props.layoutMode} walletAddress={this.props.walletAddress} usdBalance={this.props.usdBalance} actionOption={this.buyCallOption.bind(this)} buttonText={"Buy"} disabled={disabled}/>)
+                                        return (<OptionItemComponent itemStates={itemStates} seller={true} item={item} key={item.id} validationMsg={validationMsg} date={option.expiry.toNumber() * 1000} layoutMode={this.props.layoutMode} walletAddress={this.props.walletAddress} usdBalance={this.props.usdBalance} actionOption={this.buyCallOption.bind(this)} buttonText={"Buy"} disabled={disabled}/>)
                                     })
                                 }
                             </ListGroup>

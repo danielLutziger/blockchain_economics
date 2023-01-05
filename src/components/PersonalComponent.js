@@ -68,6 +68,11 @@ class PersonalComponent extends Component{
                             <ListGroup>
                                 {
                                     sells.map((option) => {
+
+                                        const  date = new Date(option.expiry.toNumber() * 1000).toISOString().split('T')
+                                        let day = date[0]
+                                        let time = date[1].split(':', 2)
+
                                         const item = {
                                             id: option.id.toNumber(),
                                             type: option.type,
@@ -77,13 +82,36 @@ class PersonalComponent extends Component{
                                             strike: ethers.utils.formatEther(option.strike),
                                             amount: ethers.utils.formatEther(option.tknAmt),
                                             seller: option.seller,
-                                            expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0],
+                                            expiration: day +' - ' + time[0] + ':' + time[1],
                                             exercised: option.exercised
+                                        }
+
+                                        const itemStates = {
+                                            expired: {
+                                                bool: new Date(option.expiry.toNumber() * 1000) < Date.now(),
+                                                text: "Expired",
+                                                color: new Date(option.expiry.toNumber() * 1000) < Date.now() ? "success" : "info"
+                                            },
+                                            cancelled: {
+                                                bool: option.canceled,
+                                                text: "Cancelled",
+                                                color: option.canceled ? "success" : "info"
+                                            },
+                                            exercised: {
+                                                bool: option.exercised,
+                                                text: "Exercised",
+                                                color: option.exercised ? "danger" : "info"
+                                            },
+                                            buyer: {
+                                                bool: item.buyer === emptyAddress,
+                                                text: "No buyer",
+                                                color: item.buyer === emptyAddress ? "info" : new Date(option.expiry.toNumber() * 1000) < Date.now() ? "success" : "warning"
+                                            }
                                         }
 
                                         const disabled = (item.buyer !== emptyAddress && new Date(option.expiry.toNumber() * 1000) > Date.now()) || option.canceled || item.exercised
                                         const validationMsg = "You cannot cancel the option because: \n- The option already bought\n- The option was already cancelled\n- The option's expiration date is in the past"
-                                        return (<OptionItemComponent date={option.expiry.toNumber() * 1000} seller={false} item={item} key={item.id} validationMsg={validationMsg} layoutMode={this.props.layoutMode} actionOption={this.cancelOption.bind(this)} walletAddress={this.props.walletAddress} buttonText={"Cancel"} disabled={disabled}/>)
+                                        return (<OptionItemComponent itemStates={itemStates} date={option.expiry.toNumber() * 1000} seller={false} item={item} key={item.id} validationMsg={validationMsg} layoutMode={this.props.layoutMode} actionOption={this.cancelOption.bind(this)} walletAddress={this.props.walletAddress} buttonText={"Cancel"} disabled={disabled}/>)
                                     })
                                 }
                             </ListGroup>
@@ -93,6 +121,11 @@ class PersonalComponent extends Component{
                             <ListGroup>
                                 {
                                     buys.map((option) => {
+
+                                        const  date = new Date(option.expiry.toNumber() * 1000).toISOString().split('T')
+                                        let day = date[0]
+                                        let time = date[1].split(':', 2)
+
                                         const item = {
                                             id: option.id.toNumber(),
                                             type: option.type,
@@ -102,13 +135,43 @@ class PersonalComponent extends Component{
                                             strike: ethers.utils.formatEther(option.strike),
                                             amount: ethers.utils.formatEther(option.tknAmt),
                                             seller: option.seller,
-                                            expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0],
+                                            expiration: day +' - ' + time[0] + ':' + time[1],
                                             exercised: option.exercised
                                         }
 
-                                        const disabled = new Date(option.expiry.toNumber() * 1000) < Date.now() || item.exercised
                                         const validationMsg = "You cannot execute the option because: \n- The option already expired\n- The option was already exercised"
-                                        return (<OptionItemComponent date={option.expiry.toNumber() * 1000} seller={true} item={item} key={item.id} layoutMode={this.props.layoutMode} validationMsg={validationMsg} actionOption={this.executeOption.bind(this)} walletAddress={this.props.walletAddress} buttonText={"Exercise"} disabled={disabled}/>)
+
+                                        const itemStates = {
+                                            expired: {
+                                                bool: new Date(option.expiry.toNumber() * 1000) < Date.now(),
+                                                text: "Expired",
+                                                color: new Date(option.expiry.toNumber() * 1000) < Date.now() ? "danger" : "info"
+                                            },
+                                            cancelled: {
+                                                bool: option.canceled,
+                                                text: "Cancelled",
+                                                color: "info"
+                                            },
+                                            exercised: {
+                                                bool: option.exercised,
+                                                text: "Exercised",
+                                                color: option.exercised ? "danger" : "info"
+                                            },
+                                            buyer: {
+                                                bool: item.buyer === emptyAddress,
+                                                text: "No buyer",
+                                                color: item.buyer === emptyAddress ? "info" : new Date(option.expiry.toNumber() * 1000) < Date.now() ? "success" : "warning"
+                                            },
+                                            funds: {
+                                                bool: (new Date(option.expiry.toNumber() * 1000) < Date.now() || item.exercised) ^ parseInt(this.props.usdBalance, 10) < parseInt(ethers.utils.formatEther(option.strike), 10),
+                                                text: "Not enough funds",
+                                                color: "warning"
+                                            },
+                                        }
+                                        console.log(parseInt(this.props.usdBalance, 10))
+                                        console.log(parseInt(ethers.utils.formatEther(option.strike), 10))
+                                        const disabled = new Date(option.expiry.toNumber() * 1000) < Date.now() || item.exercised || parseInt(this.props.usdBalance, 10) < parseInt(ethers.utils.formatEther(option.strike), 10)
+                                        return (<OptionItemComponent itemStates={itemStates} date={option.expiry.toNumber() * 1000} seller={true} item={item} key={item.id} layoutMode={this.props.layoutMode} validationMsg={validationMsg} actionOption={this.executeOption.bind(this)} walletAddress={this.props.walletAddress} buttonText={"Exercise"} disabled={disabled}/>)
                                     })
                                 }
                             </ListGroup>

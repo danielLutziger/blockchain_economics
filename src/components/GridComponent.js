@@ -43,7 +43,7 @@ class Grid extends Component {
             allCallOptions: [],
             allPutOptions: [],
             currentUSDETHPrice: 0,
-            balance: 0,
+            balance: "",
             target: null,
             showModal: false,
             modalMsg: ""
@@ -89,7 +89,6 @@ class Grid extends Component {
         const usduzh = contract.connect(signer);
         await usduzh.balanceOf(this.state.walletAddress.toLowerCase()).then(e => {
             this.setState({balance : ethers.utils.formatEther(e)})
-            console.log(ethers.utils.formatEther(e))
         });
     }
 
@@ -324,7 +323,7 @@ class Grid extends Component {
                         <Route exact path='/order' element={<OrderFormComponent executeOption={this.getOptionsOCTHandler.bind(this)} creationError={this.state.creationError} creationSuccess={this.state.creationSuccess} walletAddress={this.state.walletAddress} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
                         <Route exact path='/usdExchange' element={<USDExchangeComponent executeOrder={this.getUSDOCTHandler.bind(this)} currentUSDETHPrice={this.state.currentUSDETHPrice} orderError={this.state.orderError} orderSuccess={this.state.orderSuccess} walletAddress={this.state.walletAddress} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
                         <Route exact path='/list' element={<OfferListComponent showModal={this.state.showModal} transactionData={this.state.transactionData} modalMsg={this.state.modalMsg} hideModal={this.handleClose.bind(this)} buyCallOption={this.buyOptionOCTHandler.bind(this)} usdBalance={this.state.balance} allCallOptions={this.state.allCallOptions} allPutOptions={this.state.allPutOptions} layoutMode={this.state.layoutMode} walletAddress={this.state.walletAddress} />} />
-                            <Route exact path='/boughtAndSold' element={<PersonalComponent showModal={this.state.showModal} transactionData={this.state.transactionData} modalMsg={this.state.modalMsg} hideModal={this.handleClose.bind(this)} executeOption={this.executeOptionOCTHandler.bind(this)} cancelOption={this.cancelOptionOCTHandler.bind(this)} allCallOptions={this.state.allCallOptions} allPutOptions={this.state.allPutOptions} layoutMode={this.state.layoutMode} walletAddress={this.state.walletAddress} />} />
+                        <Route exact path='/boughtAndSold' element={<PersonalComponent showModal={this.state.showModal} transactionData={this.state.transactionData} modalMsg={this.state.modalMsg} hideModal={this.handleClose.bind(this)} executeOption={this.executeOptionOCTHandler.bind(this)} usdBalance={this.state.balance} cancelOption={this.cancelOptionOCTHandler.bind(this)} allCallOptions={this.state.allCallOptions} allPutOptions={this.state.allPutOptions} layoutMode={this.state.layoutMode} walletAddress={this.state.walletAddress} />} />
                     </Routes>
 
                 </div>

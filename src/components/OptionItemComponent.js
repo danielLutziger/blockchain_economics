@@ -1,5 +1,5 @@
 import React, {Component} from "react"
-import {ListGroup, Badge, Container, Row, Col, Button, OverlayTrigger, Tooltip} from "react-bootstrap";
+import {ListGroup, Badge, Container, Row, Col, Button} from "react-bootstrap";
 
 class OptionItemComponent extends Component{
 
@@ -11,10 +11,6 @@ class OptionItemComponent extends Component{
 
     render(){
         const myStyle = { textAlign: "left"}
-        const renderTooltip = (props) => (<Tooltip id="button-tooltip" {...props}>
-            {this.props.validationMsg}
-        </Tooltip>)
-
         return(
             <ListGroup.Item
                 as="li"
@@ -45,34 +41,35 @@ class OptionItemComponent extends Component{
                                     {this.props.item.premium} USDUZH
                                 </Col>
                             </Row>
+                            <Row>
+                                <Col xs={3}>Expiration: </Col>
+                                <Col xs={9}>
+                                    {this.props.item.expiration}
+                                </Col>
+                            </Row>
                         </Col>
                         <Col xs={3}>
                             <Row>
-
-                                <Badge bg= {this.props.date < Date.now() ? "danger" : "dark"} pill>
-                                    Expiration date:<br /> {this.props.item.expiration}
-                                </Badge>
+                                {
+                                    Object.entries(this.props.itemStates).filter(e => e[1].bool).map((e) => {
+                                        return (
+                                            <div>
+                                                <Badge bg={e[1].color} pill>
+                                                    {e[1].text}
+                                                </Badge>
+                                            </div>
+                                        )
+                                    })
+                                }
                             </Row>
                             <Row style={{"margin-top" : "20px"}}>
-                                {this.props.disabled &&
-                                <OverlayTrigger
-                                placement="right"
-                                delay={{ show: 250, hide: 400 }}
-                                overlay={renderTooltip}
-                                >
-                                <span className="d-inline-block">
-                                    <Button onClick={this.actionOption.bind(this)} id={this.props.item.id} name={this.props.item.type} variant={"outline-success"} disabled={this.props.disabled} style={{"width": "100%"}}>
-                                    {this.props.buttonText}
-                                    </Button>
-                                </span>
-                                </OverlayTrigger> }
-                                {this.props.disabled ||
+                                {!this.props.disabled &&
                                 <span className="d-inline-block">
                                     <Button onClick={this.actionOption.bind(this)} id={this.props.item.id} name={this.props.item.type} variant={"success"} disabled={this.props.disabled} style={{"width": "100%"}}>
                                     {this.props.buttonText}
                                     </Button>
-                                </span> }
-
+                                </span>
+                                }
                             </Row>
                         </Col>
                     </Row>

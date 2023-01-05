@@ -12,7 +12,7 @@
  */
 
 import React, {Component} from "react";
-import {Col, Container, ListGroup, Row, Stack} from "react-bootstrap";
+import {Col, Container, ListGroup, Row, Stack, Modal, Button} from "react-bootstrap";
 import {ethers} from "ethers";
 import OptionItemComponent from "./OptionItemComponent";
 
@@ -105,6 +105,17 @@ class PersonalComponent extends Component{
                         </Col>
                     </Row>
                 </Stack>
+                <Modal show={this.props.showModal} onHide={this.props.hideModal} style={{"color": "black"}}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Transaction</Modal.Title>
+                    </Modal.Header><Modal.Body><p>{this.props.modalMsg}</p>
+                    <p>This is the transaction hash: <span style={{"font-size" : "13px"}}>{this.props.transactionData}</span></p></Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={this.props.hideModal}>
+                            Close
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             </Container>
 
         );

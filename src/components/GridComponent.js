@@ -87,9 +87,8 @@ class Grid extends Component {
 
     async getUSDUZHBalance(contract, signer){
         const usduzh = contract.connect(signer);
-        await usduzh.balanceOf(this.state.walletAddress.toLowerCase()).then(e => {
-            this.setState({balance : ethers.utils.formatEther(e)})
-        });
+        const resp = await usduzh.balanceOf(this.state.walletAddress.toLowerCase());
+        this.setState({balance : ethers.utils.formatEther(resp)})
     }
 
     async getCurrentConnectedWallet(){

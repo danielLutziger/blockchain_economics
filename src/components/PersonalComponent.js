@@ -103,8 +103,8 @@ class PersonalComponent extends Component{
                                                 color: option.exercised ? "danger" : "info"
                                             },
                                             buyer: {
-                                                bool: item.buyer === emptyAddress,
-                                                text: "No buyer",
+                                                bool: item.buyer && !option.exercised,
+                                                text: item.buyer === emptyAddress ? "No buyer" : "Bought",
                                                 color: item.buyer === emptyAddress ? "info" : new Date(option.expiry.toNumber() * 1000) < Date.now() ? "success" : "warning"
                                             }
                                         }
@@ -163,13 +163,15 @@ class PersonalComponent extends Component{
                                                 color: item.buyer === emptyAddress ? "info" : new Date(option.expiry.toNumber() * 1000) < Date.now() ? "success" : "warning"
                                             },
                                             funds: {
-                                                bool: (new Date(option.expiry.toNumber() * 1000) < Date.now() || item.exercised) ^ parseInt(this.props.usdBalance, 10) < parseInt(ethers.utils.formatEther(option.strike), 10),
+                                                bool: new Date(option.expiry.toNumber() * 1000) > Date.now() && !option.exercised && parseInt(this.props.usdBalance, 10) < parseInt(ethers.utils.formatEther(option.strike), 10),
                                                 text: "Not enough funds",
                                                 color: "warning"
                                             },
                                         }
-                                        console.log(parseInt(this.props.usdBalance, 10))
-                                        console.log(parseInt(ethers.utils.formatEther(option.strike), 10))
+
+                                        console.log((new Date(option.expiry.toNumber() * 1000) < Date.now() || option.exercised) ^ parseInt(this.props.usdBalance, 10) < parseInt(ethers.utils.formatEther(option.strike), 10))
+                                        //console.log((new Date(option.expiry.toNumber() * 1000) < Date.now() || item.exercised)^ parseInt(this.props.usdBalance, 10) < parseInt(ethers.utils.formatEther(option.strike), 10))
+
                                         const disabled = new Date(option.expiry.toNumber() * 1000) < Date.now() || item.exercised || parseInt(this.props.usdBalance, 10) < parseInt(ethers.utils.formatEther(option.strike), 10)
                                         return (<OptionItemComponent itemStates={itemStates} date={option.expiry.toNumber() * 1000} seller={true} item={item} key={item.id} layoutMode={this.props.layoutMode} validationMsg={validationMsg} actionOption={this.executeOption.bind(this)} walletAddress={this.props.walletAddress} buttonText={"Exercise"} disabled={disabled}/>)
                                     })

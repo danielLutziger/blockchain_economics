@@ -256,7 +256,7 @@ class Grid extends Component {
                         <Route exact path='/order' element={<OrderFormComponent executeOption={this.getOptionsOCTHandler.bind(this)} creationError={this.state.creationError} creationSuccess={this.state.creationSuccess} walletAddress={this.state.walletAddress} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
                         <Route exact path='/usdExchange' element={<USDExchangeComponent executeOrder={this.getUSDOCTHandler.bind(this)} currentUSDETHPrice={this.state.currentUSDETHPrice} orderError={this.state.orderError} orderSuccess={this.state.orderSuccess} walletAddress={this.state.walletAddress} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
                         <Route exact path='/list' element={<OfferListComponent buyCallOption={this.buyCallOptionOCTHandler.bind(this)} allCallOptions={this.state.allCallOptions} allPutOptions={this.state.allPutOptions} layoutMode={this.state.layoutMode}/>} />
-                        <Route exact path='/boughtAndSold' element={<PersonalComponent />} />
+                        <Route exact path='/boughtAndSold' element={<PersonalComponent buyCallOption={this.buyCallOptionOCTHandler.bind(this)} allCallOptions={this.state.allCallOptions} allPutOptions={this.state.allPutOptions} layoutMode={this.state.layoutMode} walletAddress={this.state.walletAddress} />} />
                     </Routes>
 
                 </div>

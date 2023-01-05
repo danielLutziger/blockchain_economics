@@ -175,7 +175,7 @@ class Grid extends Component {
             date.setHours(option.expirationTime.split(':')[0]);
             date.setMinutes(option.expirationTime.split(':')[1]);
             date = date.getTime() / 1000;
-            console.log(date);
+
             let resp;
             if (type === "Call"){
                 resp = await optionsContractWithSigner.sellCall(strikePriceInWei, premiumInWei, date, tokenAmountInWei, {value: valueInWei})

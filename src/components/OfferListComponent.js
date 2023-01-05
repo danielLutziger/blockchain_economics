@@ -68,8 +68,6 @@ class OfferListComponent extends Component {
                                             }
                                         }
 
-                                        console.log(this.props.usdBalance)
-
                                         const disabled = this.props.walletAddress.toLowerCase() === item.seller.toLowerCase() || parseInt(this.props.usdBalance, 10) < parseInt(ethers.utils.formatEther(option.premium), 10)
 
                                         const validationMsg = "You are either the seller or have insufficient funds"

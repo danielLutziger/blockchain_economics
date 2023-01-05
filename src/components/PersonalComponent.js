@@ -168,10 +168,6 @@ class PersonalComponent extends Component{
                                                 color: "warning"
                                             },
                                         }
-
-                                        console.log((new Date(option.expiry.toNumber() * 1000) < Date.now() || option.exercised) ^ parseInt(this.props.usdBalance, 10) < parseInt(ethers.utils.formatEther(option.strike), 10))
-                                        //console.log((new Date(option.expiry.toNumber() * 1000) < Date.now() || item.exercised)^ parseInt(this.props.usdBalance, 10) < parseInt(ethers.utils.formatEther(option.strike), 10))
-
                                         const disabled = new Date(option.expiry.toNumber() * 1000) < Date.now() || item.exercised || parseInt(this.props.usdBalance, 10) < parseInt(ethers.utils.formatEther(option.strike), 10)
                                         return (<OptionItemComponent itemStates={itemStates} date={option.expiry.toNumber() * 1000} seller={true} item={item} key={item.id} layoutMode={this.props.layoutMode} validationMsg={validationMsg} actionOption={this.executeOption.bind(this)} walletAddress={this.props.walletAddress} buttonText={"Exercise"} disabled={disabled}/>)
                                     })

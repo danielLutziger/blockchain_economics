@@ -73,7 +73,7 @@ class PersonalComponent extends Component{
                                             seller: option.seller,
                                             expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
                                         }
-                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} buyCallOption={this.buyCallOption.bind(this)}/>)
+                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} buyCallOption={this.buyCallOption.bind(this)} walletAddress={this.props.walletAddress}/>)
                                     })
                                 }
                             </ListGroup>
@@ -94,7 +94,7 @@ class PersonalComponent extends Component{
                                             seller: option.seller,
                                             expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
                                         }
-                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} buyCallOption={this.buyCallOption.bind(this)}/>)
+                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} buyCallOption={this.buyCallOption.bind(this)} walletAddress={this.props.walletAddress}/>)
                                     })
                                 }
                             </ListGroup>

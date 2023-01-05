@@ -1,12 +1,21 @@
 import React, {Component} from "react"
-import {ListGroup, Badge, Container, Row, Col, Button} from "react-bootstrap";
+import {ListGroup, Badge, Container, Row, Col, Button, OverlayTrigger, Tooltip} from "react-bootstrap";
 
 class OptionItemComponent extends Component{
+
     buyCallOption(event){
+        // cannot buy your own option
         this.props.buyCallOption(event.target.id);
     }
+
+
     render(){
         const myStyle = { textAlign: "left"}
+        const disabled = this.props.walletAddress.toLowerCase() === this.props.item.seller.toLowerCase() || this.props.usdBalance < this.props.item.premium
+        const renderTooltip = (props) => (<Tooltip id="button-tooltip" {...props}>
+            You are either the seller or have insufficient funds
+        </Tooltip>)
+
         return(
             <ListGroup.Item
                 as="li"
@@ -40,7 +49,7 @@ class OptionItemComponent extends Component{
                             <Row>
                                 <Col xs={3}>Cost: </Col>
                                 <Col xs={9}>
-                                    {this.props.item.costToExercise} (Call: USDUZH | Put UZHETH)
+                                    {this.props.item.costToExercise} {this.props.item.type ==="Call" ? "USDUZH" : "UZHETH"}
                                 </Col>
                             </Row>
                         </Col>
@@ -51,9 +60,25 @@ class OptionItemComponent extends Component{
                                 </Badge>
                             </Row>
                             <Row style={{"margin-top" : "20px"}}>
-                                <Button onClick={this.buyCallOption.bind(this)} id={this.props.item.id} name={this.props.item.id} variant={"success"}>
+                                {disabled &&
+                                <OverlayTrigger
+                                placement="right"
+                                delay={{ show: 250, hide: 400 }}
+                                overlay={renderTooltip}
+                                >
+                                <span className="d-inline-block">
+                                    <Button onClick={this.buyCallOption.bind(this)} id={this.props.item.id} name={this.props.item.id} variant={"success"} disabled={disabled} style={{"width": "100%"}}>
                                     Buy
-                                </Button>
+                                    </Button>
+                                </span>
+                                </OverlayTrigger> }
+                                {disabled ||
+                                <span className="d-inline-block">
+                                    <Button onClick={this.buyCallOption.bind(this)} id={this.props.item.id} name={this.props.item.id} variant={"success"} disabled={disabled} style={{"width": "100%"}}>
+                                    Buy
+                                    </Button>
+                                </span> }
+
                             </Row>
                         </Col>
                     </Row>

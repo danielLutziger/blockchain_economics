@@ -42,6 +42,7 @@ class Grid extends Component {
             allCallOptions: [],
             allPutOptions: [],
             currentUSDETHPrice: 0,
+            balance: 0,
             target: null
         };
     }
@@ -75,9 +76,10 @@ class Grid extends Component {
 
     async getAllOptions(contract, signer){
         const optionsContractWithSigner = contract.connect(signer);
-        console.log("here")
         await optionsContractWithSigner.getCallOpts().then(e => this.setState({allCallOptions : e}));
         await optionsContractWithSigner.getPutOpts().then(e => this.setState({allPutOptions : e}));
+        console.log(optionsContractWithSigner)
+        //await optionsContractWithSigner.getBalance().then(e => this.setState({balance : e}));
     }
 
     async getCurrentConnectedWallet(){
@@ -255,8 +257,8 @@ class Grid extends Component {
                         <Route exact path='/faucet' element={<FaucetComponent faucet={this.state.faucet} withdrawError={this.state.withdrawError} withdrawSuccess={this.state.withdrawSuccess} walletAddress={this.state.walletAddress} getOCTHandler={this.getFaucetOCTHandler.bind(this)} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode}/>} />
                         <Route exact path='/order' element={<OrderFormComponent executeOption={this.getOptionsOCTHandler.bind(this)} creationError={this.state.creationError} creationSuccess={this.state.creationSuccess} walletAddress={this.state.walletAddress} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
                         <Route exact path='/usdExchange' element={<USDExchangeComponent executeOrder={this.getUSDOCTHandler.bind(this)} currentUSDETHPrice={this.state.currentUSDETHPrice} orderError={this.state.orderError} orderSuccess={this.state.orderSuccess} walletAddress={this.state.walletAddress} transactionData={this.state.transactionData} elementMode={this.state.elementMode} layoutMode={this.state.layoutMode} ethPriceData={this.state.ethPriceData} />} />
-                        <Route exact path='/list' element={<OfferListComponent buyCallOption={this.buyCallOptionOCTHandler.bind(this)} allCallOptions={this.state.allCallOptions} allPutOptions={this.state.allPutOptions} layoutMode={this.state.layoutMode}/>} />
-                        <Route exact path='/boughtAndSold' element={<PersonalComponent buyCallOption={this.buyCallOptionOCTHandler.bind(this)} allCallOptions={this.state.allCallOptions} allPutOptions={this.state.allPutOptions} layoutMode={this.state.layoutMode} walletAddress={this.state.walletAddress} />} />
+                        <Route exact path='/list' element={<OfferListComponent buyCallOption={this.buyCallOptionOCTHandler.bind(this)} usdBalance={this.state.balance} allCallOptions={this.state.allCallOptions} allPutOptions={this.state.allPutOptions} layoutMode={this.state.layoutMode} walletAddress={this.state.walletAddress} />} />
+                            <Route exact path='/boughtAndSold' element={<PersonalComponent buyCallOption={this.buyCallOptionOCTHandler.bind(this)} allCallOptions={this.state.allCallOptions} allPutOptions={this.state.allPutOptions} layoutMode={this.state.layoutMode} walletAddress={this.state.walletAddress} />} />
                     </Routes>
 
                 </div>

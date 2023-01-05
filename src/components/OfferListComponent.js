@@ -10,7 +10,6 @@ class OfferListComponent extends Component {
         this.props.buyCallOption(id);
     }
     render() {
-        console.log(this.props.allCallOptions)
         const filteredCalls = this.props.allCallOptions.filter(e => {return (e.buyer === emptyAddress && !e.canceled && !e.exercised && new Date(e.expiry.toNumber() * 1000) > Date.now())});
         const filteredPuts = this.props.allPutOptions.filter(e => {return (e.buyer === emptyAddress && !e.canceled && !e.exercised && new Date(e.expiry.toNumber() * 1000) > Date.now())});
         return (
@@ -40,7 +39,7 @@ class OfferListComponent extends Component {
                                             seller: option.seller,
                                             expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
                                         }
-                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} buyCallOption={this.buyCallOption.bind(this)}/>)
+                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} walletAddress={this.props.walletAddress} buyCallOption={this.buyCallOption.bind(this)}/>)
                                     })
                                 }
                             </ListGroup>
@@ -61,7 +60,7 @@ class OfferListComponent extends Component {
                                             seller: option.seller,
                                             expiration: new Date(option.expiry.toNumber() * 1000).toISOString().split('T')[0]
                                         }
-                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} buyCallOption={this.buyCallOption.bind(this)}/>)
+                                        return (<OptionItemComponent item={item} key={item.id} layoutMode={this.props.layoutMode} walletAddress={this.props.walletAddress} usdBalance={this.props.usdBalance} buyCallOption={this.buyCallOption.bind(this)}/>)
                                     })
                                 }
                             </ListGroup>

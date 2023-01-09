@@ -6,8 +6,8 @@ import {emptyAddress} from "../utils/Constants";
 
 class OfferListComponent extends Component {
 
-    buyCallOption(id, type, amount){
-        this.props.buyCallOption(id, type, amount);
+    buyCallOption(id, type, amount, premium, costToExercise){
+        this.props.buyCallOption(id, type, amount, premium, costToExercise);
     }
     render() {
         const filteredCalls = this.props.allCallOptions.filter(e => {return (e.buyer === emptyAddress && !e.canceled && !e.exercised && new Date(e.expiry.toNumber() * 1000) > Date.now())});

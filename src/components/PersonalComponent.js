@@ -19,8 +19,8 @@ import {emptyAddress} from "../utils/Constants";
 
 class PersonalComponent extends Component{
 
-    executeOption(id, type, amount){
-        this.props.executeOption(id, type, amount);
+    executeOption(id, type, amount, premium, costToExercise){
+        this.props.executeOption(id, type, amount, premium, costToExercise);
     }
 
     cancelOption(id, type){

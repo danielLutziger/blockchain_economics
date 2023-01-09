@@ -1,7 +1,7 @@
 // Local instance of the faucet contract
 import { ethers } from "ethers";
 
-const usdUZHAddress = "0xec38C5e4CeaE2c030D0f43A47289AA7b47FE7a68";
+const usdUZHAddress = "0x2Ad0091E9276FAfc6cb775d841E2ca407B20C748";
 const usdUZHAbi = [
     {
         "inputs": [],
@@ -62,6 +62,54 @@ const usdUZHAbi = [
         "inputs": [
             {
                 "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "delegate",
+                "type": "address"
+            }
+        ],
+        "name": "allowance",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "delegate",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "numTokens",
+                "type": "uint256"
+            }
+        ],
+        "name": "approve",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
                 "name": "tokenOwner",
                 "type": "address"
             }
@@ -88,6 +136,19 @@ const usdUZHAbi = [
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "listOnCoinMarketCap",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {

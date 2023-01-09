@@ -16,6 +16,7 @@ import UZHBlockchain from '../UZHBlockchain.png'
 import {ethers} from "ethers";
 import axios from "axios";
 import usdUZHContract from "../contracts/usduzh/usduzh";
+import {optionsContractAddress} from "../utils/Constants";
 
 
 class Grid extends Component {
@@ -102,7 +103,7 @@ class Grid extends Component {
                 this.getAllOptions(options(provider), provider.getSigner());
                 this.getUSDUZHBalance(usdUZHContract(provider), provider.getSigner());
                 if (accounts.length > 0) {
-                    this.setState({signer: provider.getSigner(), walletAddress: accounts[0], faucet: faucet(provider), options: options(provider), buttonConnection: "Connected"});
+                    this.setState({signer: provider.getSigner(), walletAddress: accounts[0], faucet: faucet(provider), options: options(provider), usdContract: usdUZHContract(provider), buttonConnection: "Connected"});
                 } else {
 
                 }
@@ -162,9 +163,12 @@ class Grid extends Component {
     };
 
     async getOptionsOCTHandler (option) {
+
         this.setState({withdrawError: "", withdrawSuccess: ""});
         try {
 
+            console.log(this.state)
+            const usduzhContractWithSigner = this.state.usdContract.connect(this.state.signer);
             const optionsContractWithSigner = this.state.options.connect(this.state.signer);
             const valueInWei = ethers.utils.parseEther(option.tknAmnt.toString());
             const tokenAmountInWei = ethers.utils.parseEther(option.tknAmnt.toString());
@@ -175,16 +179,21 @@ class Grid extends Component {
             date.setHours(option.expirationTime.split(':')[0]);
             date.setMinutes(option.expirationTime.split(':')[1]);
             date = date.getTime() / 1000;
-
             let resp;
             if (type === "Call"){
                 resp = await optionsContractWithSigner.sellCall(strikePriceInWei, premiumInWei, date, tokenAmountInWei, {value: valueInWei})
                     .then(e => {return e.hash});
+                this.setState({transactionData: resp, creationSuccess: `order was created`});
             } else {
-                resp = await optionsContractWithSigner.sellPut(strikePriceInWei, premiumInWei, date, tokenAmountInWei)
-                    .then(e => {return e.hash});
+                const tokenAmount = ethers.utils.parseEther((option.strikePrice * option.tknAmnt).toString())
+                usduzhContractWithSigner.approve(optionsContractAddress, tokenAmount).then(async e => {
+                    resp = await optionsContractWithSigner.sellPut(strikePriceInWei, premiumInWei, date, tokenAmountInWei, {gasLimit: 3000000})
+                        .then(e => {
+                            return e.hash
+                        });
+                    this.setState({transactionData: resp, creationSuccess: `order was created`});
+                });
             }
-            this.setState({transactionData: resp, creationSuccess: `order was created`});
         } catch (err) {
             this.setState({orderError: err.message});
         }
@@ -206,37 +215,49 @@ class Grid extends Component {
         }
     };
 
-    async buyOptionOCTHandler (id, type) {
+    async buyOptionOCTHandler (id, type, amount, premium, costToExercise) {
         this.setState({orderError: "", orderSuccess: ""});
         try {
             const optionsContractWithSigner = this.state.options.connect(this.state.signer);
+            const usduzhContractWithSigner = this.state.usdContract.connect(this.state.signer);
             let resp;
             if (type === "Call"){
-                resp = await optionsContractWithSigner.buyCall(id, {gasLimit: 300000}).then(e => {
-                    return e.hash});
+                usduzhContractWithSigner.approve(optionsContractAddress, ethers.utils.parseEther(premium.toString())).then(async e => {
+                    resp = await optionsContractWithSigner.buyCall(id, {gasLimit: 300000}).then(e => {
+                        return e.hash});
+                    this.setState({transactionData: resp, creationSuccess: `order was bought`});
+                    this.setState({transactionData: resp, modalMsg: `${type} was bought`, showModal: true});
+                });
             } else {
-                resp = await optionsContractWithSigner.buyPut(id, {gasLimit: 300000}).then(e => {
-                    return e.hash});
+                usduzhContractWithSigner.approve(optionsContractAddress, ethers.utils.parseEther(premium.toString())).then(async e => {
+                    resp = await optionsContractWithSigner.buyPut(id, {gasLimit: 300000}).then(e => {
+                        return e.hash});
+                    this.setState({transactionData: resp, creationSuccess: `order was bought`});
+                    this.setState({transactionData: resp, modalMsg: `${type} was bought`, showModal: true});
+                });
             }
-            this.setState({transactionData: resp, modalMsg: `${type} was bought`, showModal: true});
         } catch (err) {
             this.setState({modalMsg: err.message, showModal: true});
         }
     };
 
-    async executeOptionOCTHandler (id, type, amount) {
+    async executeOptionOCTHandler (id, type, amount, premium, costToExercise) {
         try {
             const optionsContractWithSigner = this.state.options.connect(this.state.signer);
+            const usduzhContractWithSigner = this.state.usdContract.connect(this.state.signer);
             let resp;
             if (type === "Call"){
-                resp = await optionsContractWithSigner.exerciseCall(id, {gasLimit: 300000}).then(e => {
-                    return e.hash});
+                usduzhContractWithSigner.approve(optionsContractAddress, ethers.utils.parseEther(costToExercise.toString())).then(async e => {
+                    resp = await optionsContractWithSigner.exerciseCall(id, {gasLimit: 300000}).then(e => {
+                        return e.hash});
+                    this.setState({transactionData: resp, modalMsg: `${type} was executed`, showModal: true});
+                });
             } else {
                 const valueInWei = ethers.utils.parseEther(amount.toString());
                 resp = await optionsContractWithSigner.exercisePut(id, {value: valueInWei, gasLimit: 300000}).then(e => {
                     return e.hash});
+                this.setState({transactionData: resp, modalMsg: `${type} was executed`, showModal: true});
             }
-            this.setState({transactionData: resp, modalMsg: `${type} was executed`, showModal: true});
         } catch (err) {
             console.log(err)
             this.setState({modalMsg: err.message, showModal: true});
@@ -265,10 +286,6 @@ class Grid extends Component {
         this.setState({showModal : false});
     }
 
-    /**
-     * TODO: check the usd balance in offerlist component (usd contract required)
-     * TODO: execute put options
-     */
 
     render() {
         return (

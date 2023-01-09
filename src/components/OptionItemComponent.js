@@ -5,7 +5,7 @@ class OptionItemComponent extends Component{
 
     actionOption(event){
         // cannot buy your own option
-        this.props.actionOption(event.target.id, event.target.name, this.props.item.amount);
+        this.props.actionOption(event.target.id, event.target.name, this.props.item.amount, this.props.item.premium, this.props.item.costToExercise);
     }
 
 

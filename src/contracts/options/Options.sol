@@ -28,13 +28,14 @@ contract Options is ChainlinkClient, ConfirmedOwner{
     uint256 private fee;
 
     // For initalizing the USDUZH contract:
-    address _usduzhAddress = 0xec38C5e4CeaE2c030D0f43A47289AA7b47FE7a68;
+    address _usduzhAddress = 0x2Ad0091E9276FAfc6cb775d841E2ca407B20C748;
     USDUZH usduzh;
     address payable contractAddr;
 
 
     //Mapping used for the requests:
     mapping (bytes32 => address) ethrequest;
+    mapping (address => uint) ethamount;
 
     // Create a constructor for the BuyUZH contract
     constructor () ConfirmedOwner(msg.sender){
@@ -50,12 +51,13 @@ contract Options is ChainlinkClient, ConfirmedOwner{
     }
 
     /// Functions specifically for buying USDUZH tokens with ETH using ChainLink //
-    // Create a function to buy UZH tokens
+    // Create a function to buy UZH tokens 000000000000000000
     function buyUZH() public payable{
         // Require the payment to be at least 1 ETH:
         require(msg.value >= 1 ether, "You need to pay at least 1 ETH");
         requestId = getEthereumPrice();
         ethrequest[requestId] = msg.sender;
+        ethamount[msg.sender] = msg.value;
     }
 
     // Ethereum cost call:
@@ -82,7 +84,8 @@ contract Options is ChainlinkClient, ConfirmedOwner{
     function fullfillETH(bytes32 _requestId,uint256 _ethPrice) public recordChainlinkFulfillment(_requestId) {
         ethPrice = _ethPrice;
         address beneficiary = ethrequest[_requestId];
-        usduzh.transferFrom(address(this), payable(beneficiary), ethPrice);
+        uint amount = ethamount[beneficiary];
+        usduzh.transfer(payable(beneficiary), ethPrice*amount/10**18);
 
     }
 
@@ -130,14 +133,16 @@ contract Options is ChainlinkClient, ConfirmedOwner{
         // Assert, that the payable amount is equal to the tknAmt:
         require(msg.value == tknAmt, "You need to pay the correct amount of Ethereum");
         // Cost to exercise the option = strike * tknAmt in USDUZH:
-        uint costToExercise = strike * tknAmt/10**18;
+        uint costToExercise = (strike * tknAmt)/10**18;
+        premium = (premium*tknAmt)/10**18;
         callOpts.push(option(strike, premium, expiry, tknAmt, false, false, callOpts.length, costToExercise, payable(msg.sender), payable(address(0))));
         emit OptionCreated(callOpts.length - 1);
     }
 
     // Sell a put option:
-    function sellPut(uint strike, uint premium, uint expiry, uint tknAmt) public {
-        uint costToExercise = strike * tknAmt/10**18;
+    function sellPut(uint strike, uint premium, uint expiry, uint tknAmt) public payable {
+        uint costToExercise = (strike * tknAmt)/10**18;
+        premium = (premium*tknAmt)/10**18;
         // Require, that the expiry is in the future:
         require(expiry > block.timestamp, "You need to have an expiry in the future");
         // Require the minumum tknAmt to be 1 ETH:
@@ -202,7 +207,8 @@ contract Options is ChainlinkClient, ConfirmedOwner{
         // Set the buyer of the option:
         callOpts[id].buyer = payable(msg.sender);
         // Transfer the premium from the buyer to the writer:
-        usduzh.transferFrom(msg.sender, callOpts[id].seller, callOpts[id].premium);
+        usduzh.transferFrom(msg.sender, address(this), callOpts[id].premium);
+        usduzh.transfer(callOpts[id].seller, callOpts[id].premium);
         emit OptionBought(id);
     }
 
@@ -219,11 +225,12 @@ contract Options is ChainlinkClient, ConfirmedOwner{
         // Require, that the option is not already bought:
         require(putOpts[id].buyer == address(0), "You can't buy an option that is already bought");
         // Require, that the user pays the correct amount of USDUZH:
-        require(usduzh.balanceOf(msg.sender) >= callOpts[id].premium, "You need to have enough USDUZH");
+        require(usduzh.balanceOf(msg.sender) >= putOpts[id].premium, "You need to have enough USDUZH");
         // Set the buyer of the option:
         putOpts[id].buyer = payable(msg.sender);
         // Transfer the premium from the buyer to the writer:
-        usduzh.transferFrom(msg.sender, callOpts[id].seller, callOpts[id].premium);
+        usduzh.transferFrom(msg.sender, address(this), putOpts[id].premium);
+        usduzh.transfer(putOpts[id].seller, putOpts[id].premium);
         emit OptionBought(id);
     }
 
@@ -244,7 +251,8 @@ contract Options is ChainlinkClient, ConfirmedOwner{
         // Transfer the collateral ETH from the contract to the buyer:
         callOpts[id].buyer.transfer(callOpts[id].tknAmt);
         // Transfer the tknAmt * strike USDUZH from the msg.sender (buyer) to the seller:
-        usduzh.transferFrom(msg.sender, callOpts[id].seller, callOpts[id].costToExercise);
+        usduzh.transferFrom(msg.sender, address(this), callOpts[id].costToExercise);
+        usduzh.transfer(callOpts[id].seller, callOpts[id].costToExercise);
         emit OptionExercised(id);
     }
 
@@ -257,7 +265,7 @@ contract Options is ChainlinkClient, ConfirmedOwner{
         // Require, that the option is not expired:
         require(putOpts[id].expiry > block.timestamp, "You can't exercise an expired option");
         // Require, that the caller is the buyer:
-        require(callOpts[id].buyer == msg.sender, "You can't exercise an option that you didn't buy");
+        require(putOpts[id].buyer == msg.sender, "You can't exercise an option that you didn't buy");
         // Require, that the user pays the correct amount of ETH:
         require(msg.value == putOpts[id].tknAmt, "You need to have enough ETH");
         // Set the option to exercised:

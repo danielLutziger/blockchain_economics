@@ -38,12 +38,12 @@ class Home extends Component {
                             </thead>
                             <tbody>
                             <tr>
-                                <td>17-706-706</td>
+                                <td>15-703-341</td>
                                 <td>Dennis</td>
                                 <td>Shushack</td>
                             </tr>
                             <tr>
-                                <td>15-703-341</td>
+                                <td>17-706-706</td>
                                 <td>Venusan</td>
                                 <td>Velrajah</td>
                             </tr>

@@ -12,7 +12,7 @@ import PersonalComponent from "./PersonalComponent";
 import options from "../contracts/options/options"
 import faucet from "../contracts/faucet/faucet";
 import "../App.css";
-import UZHBlockchain from '../UZHBlockchain.png'
+import UZHBlockchain from '../bcc.png'
 import {ethers} from "ethers";
 import axios from "axios";
 import usdUZHContract from "../contracts/usduzh/usduzh";
@@ -297,8 +297,7 @@ class Grid extends Component {
                                 <img
                                     alt="UZH Blockchain"
                                     src={UZHBlockchain}
-                                    width="60"
-                                    height="50"
+                                    height="60"
                                     className="d-inline-block align-top" />{' '}
                             </Navbar.Brand>
                             <Navbar.Toggle aria-controls="basic-navbar-nav" />
